@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Training">
+<meta name="theme-color" content="#0f1115">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Training</title>
+<style>
+:root{
+  --bg:#0f1115;--card:#181b22;--card2:#20242d;--line:#2c313c;--text:#eef0f4;--muted:#9aa3b2;
+  --acc:#b8f03c;--accText:#10130a;--accSoft:rgba(184,240,60,.12);
+  --warn:#ffb54a;--warnBg:rgba(255,181,74,.12);--danger:#ff6b6b;--done:#1f2a14;
+  --r:14px;--safeB:env(safe-area-inset-bottom,0px);--safeT:env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme: light){
+  :root{--bg:#f3f4f6;--card:#fff;--card2:#eef0f3;--line:#d8dce2;--text:#14171c;--muted:#5d6675;
+  --acc:#4d7c0f;--accText:#fff;--accSoft:rgba(77,124,15,.10);--warn:#9a5b00;--warnBg:#fff3d6;
+  --danger:#c62828;--done:#eef7e3}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+main{padding:calc(var(--safeT) + 12px) 14px calc(var(--safeB) + 150px);max-width:640px;margin:0 auto}
+h1{font-size:26px;line-height:1.15;margin:6px 0 12px}
+h2{font-size:19px;margin:22px 0 8px}
+h3{font-size:16px;margin:14px 0 6px}
+p{margin:6px 0}
+.muted{color:var(--muted)} .small{font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:10px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:8px}
+button,select,input{font:inherit;color:inherit}
+.btn{display:block;width:100%;border:1px solid var(--line);background:var(--card2);border-radius:12px;
+  padding:13px 14px;margin:8px 0;text-align:left;font-weight:600}
+.btn.acc{background:var(--acc);color:var(--accText);border-color:var(--acc);text-align:center}
+.btn.big{font-size:18px;padding:16px}
+.btn.ghost{background:transparent;text-align:center;color:var(--muted);font-weight:500}
+.btn.danger{color:var(--danger);text-align:center;background:transparent}
+.btn .sub{display:block;font-weight:400;font-size:14px;color:var(--muted)}
+.btn.acc .sub{color:inherit;opacity:.75}
+.mini{border:1px solid var(--line);background:var(--card2);border-radius:10px;padding:7px 11px;font-weight:600;font-size:14px}
+.mini.acc{background:var(--acc);color:var(--accText);border-color:var(--acc)}
+.link{background:none;border:0;color:var(--acc);font-weight:600;padding:6px 0}
+.pill{display:inline-block;background:var(--accSoft);color:var(--acc);border-radius:99px;padding:3px 10px;font-size:13px;font-weight:700}
+.banner{border-radius:12px;padding:11px 13px;margin:10px 0;font-size:15px}
+.banner.warn{background:var(--warnBg);color:var(--warn);border:1px solid var(--warn)}
+.banner.acc{background:var(--accSoft);border:1px solid var(--acc)}
+/* Übungskarte */
+.ex .exhead{display:flex;gap:10px;align-items:flex-start}
+.nr{flex:0 0 auto;min-width:34px;height:34px;border-radius:10px;background:var(--card2);display:flex;
+  align-items:center;justify-content:center;font-weight:800}
+.ex.done .nr{background:var(--acc);color:var(--accText)}
+.vpick{position:relative;font-weight:700;font-size:18px;line-height:1.25}
+.vpick .swap{display:inline-block;margin-left:6px;font-size:12px;font-weight:700;color:var(--acc);
+  border:1px solid var(--acc);border-radius:99px;padding:1px 7px;vertical-align:2px;white-space:nowrap}
+.vpick select{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px}
+.target{color:var(--muted);font-size:14px;margin-top:2px}
+.bein{background:var(--warnBg);color:var(--warn);border-radius:10px;padding:8px 10px;margin:10px 0 0;font-size:14px}
+.today{background:var(--accSoft);border-radius:10px;padding:8px 10px;margin:10px 0 0;font-size:14px}
+.last{font-size:14px;color:var(--muted);margin:10px 0 4px}
+.prog{background:var(--accSoft);border:1px solid var(--acc);border-radius:10px;padding:9px 10px;margin:8px 0;font-size:14px}
+.prog .row{margin-top:6px}
+.setrow{display:grid;grid-template-columns:26px 1fr 14px 1fr 50px;gap:8px;align-items:center;margin:8px 0}
+.setrow .sn{color:var(--muted);font-weight:700;text-align:center}
+.setrow input{width:100%;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--card2);
+  text-align:center;font-size:18px;font-weight:600}
+.setrow input::placeholder{color:var(--muted);font-weight:400;font-size:15px}
+.setrow.done input{background:var(--done);border-color:var(--acc)}
+.chk{height:46px;border-radius:10px;border:2px solid var(--line);background:transparent;font-size:22px;font-weight:800}
+.setrow.done .chk{background:var(--acc);border-color:var(--acc);color:var(--accText)}
+.x{text-align:center;color:var(--muted)}
+.note{width:100%;margin-top:8px;border:1px solid var(--line);background:transparent;border-radius:10px;padding:9px 10px;font-size:16px}
+details.det{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+details summary{cursor:pointer;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details.det summary{color:var(--acc);font-size:15px}
+details summary::after{content:" ▾";color:var(--muted)}
+details[open] summary::after{content:" ▴"}
+dl{margin:8px 0 0} dt{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:10px}
+dd{margin:2px 0 0;font-size:15px} dd ol,dd ul{margin:2px 0;padding-left:20px} dd li{margin:3px 0}
+.ssbanner{border-left:4px solid var(--acc);padding:6px 10px;margin:18px 0 -2px;font-size:14px;background:var(--accSoft);border-radius:6px}
+.topbar{display:flex;justify-content:space-between;align-items:center}
+/* Tabs + Timer */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--card);border-top:1px solid var(--line);padding-bottom:var(--safeB);z-index:20}
+nav.tabs button{background:none;border:0;padding:9px 0 8px;font-size:12px;color:var(--muted);font-weight:600}
+nav.tabs button .i{display:block;font-size:20px;line-height:1.2}
+nav.tabs button.on{color:var(--acc)}
+#timer{position:fixed;left:10px;right:10px;bottom:calc(var(--safeB) + 66px);z-index:19;display:none;
+  background:var(--acc);color:var(--accText);border-radius:14px;padding:10px 12px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#timer .t{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+#timer .bar{height:4px;background:rgba(0,0,0,.2);border-radius:4px;margin-top:6px;overflow:hidden}
+#timer .bar i{display:block;height:100%;background:var(--accText);width:0}
+#timer button{background:rgba(0,0,0,.15);border:0;border-radius:9px;padding:7px 10px;font-weight:700;color:var(--accText)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(var(--safeT) + 12px);z-index:30;background:var(--text);
+  color:var(--bg);padding:9px 14px;border-radius:10px;font-size:15px;display:none;max-width:90%}
+/* Tabellen, Formulare */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:7px 5px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.form label{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
+.form input[type=text],.form input[type=date],.form select{width:100%;height:46px;border-radius:10px;
+  border:1px solid var(--line);background:var(--card2);padding:0 12px;font-size:17px}
+.check{display:flex;gap:10px;align-items:center;margin-top:12px;font-size:16px}
+.check input{width:24px;height:24px;accent-color:var(--acc)}
+.seg{display:flex;background:var(--card2);border-radius:11px;padding:3px;margin:8px 0}
+.seg button{flex:1;border:0;background:none;padding:8px;border-radius:9px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.spark{width:100%;height:70px;display:block}
+.info p,.info li{font-size:15px} .info ul,.info ol{padding-left:20px;margin:6px 0}
+.info details{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;margin:10px 0}
+.info details summary{font-size:17px}
+.tag{font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+.k{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="timer">
+  <div class="spread"><div><div class="small" id="tlabel">Satzpause</div><div class="t" id="tval">0:00</div></div>
+  <div class="row"><button data-a="t30">+30 s</button><button data-a="tstop">Fertig</button></div></div>
+  <div class="bar"><i id="tbar"></i></div>
+</div>
+<div id="toast"></div>
+<nav class="tabs" id="tabs">
+  <button data-tab="home"><span class="i">🏋️</span>Training</button>
+  <button data-tab="track"><span class="i">📉</span>Körper</button>
+  <button data-tab="hist"><span class="i">📒</span>Verlauf</button>
+  <button data-tab="info"><span class="i">ℹ️</span>Infos</button>
+</nav>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<template id="infoTpl">
+<details>
+  <summary>Wochenplan</summary>
+  <table>
+    <tr><th>Tag</th><th>Einheit</th></tr>
+    <tr><td><b>Montag</b></td><td>Oberkörper A – Brust</td></tr>
+    <tr><td><b>Dienstag</b></td><td>Unterkörper A – Quadrizeps + Bauch</td></tr>
+    <tr><td>Mittwoch</td><td>Pause – Schritte sammeln</td></tr>
+    <tr><td><b>Donnerstag</b></td><td>Oberkörper B – Lat und Arme</td></tr>
+    <tr><td><b>Freitag oder Samstag</b></td><td>Unterkörper B – Beine + Bauch</td></tr>
+    <tr><td>Rest</td><td>Pause, optional 20–30 Min lockeres Cardio</td></tr>
+  </table>
+  <p class="small">Übungen in der angegebenen Reihenfolge. Jede Alternative ist austauschbar, solange Muskel und Satzzahl gleich bleiben – in der App einfach oben auf den Übungsnamen tippen.</p>
+  <h3>Direkte Sätze pro Woche (ca.)</h3>
+  <table>
+    <tr><td>Brust</td><td class="num">12</td></tr><tr><td>Lat / Rücken</td><td class="num">14</td></tr>
+    <tr><td>Bizeps (+ indirekt durch Ziehen, effektiv ca. 16)</td><td class="num">10</td></tr>
+    <tr><td>Trizeps (+ indirekt durch Drücken, effektiv ca. 14)</td><td class="num">8</td></tr>
+    <tr><td>Seitliche Schulter</td><td class="num">8</td></tr><tr><td>Quadrizeps</td><td class="num">12</td></tr>
+    <tr><td>Bauch</td><td class="num">9</td></tr><tr><td>Beinbeuger / Gesäß</td><td class="num">ausreichend</td></tr>
+  </table>
+</details>
+<details>
+  <summary>Die 6 Trainingsprinzipien</summary>
+  <ol>
+    <li><b>Volumen ist der Haupthebel.</b> Prioritätsmuskeln 12–16 Sätze pro Woche (Pelland et al., Meta-Analyse). Indirekte Sätze zählen halb.</li>
+    <li><b>4 Tage reichen.</b> Bei gleichem Volumen bringt mehr Frequenz nicht klar mehr Wachstum.</li>
+    <li><b>Wiederholungsbereich ist flexibel</b> (Schoenfeld 2017). Entscheidend ist die Nähe zum Muskelversagen: 0–2 RIR. Grundübungen eher 1–2 RIR, beim letzten Isolationssatz ist Versagen okay.</li>
+    <li><b>Gedehnte Position betonen.</b> Lengthened Partials sind möglicherweise vorteilhaft (Wolf 2023), die Evidenz ist aber unsicher.</li>
+    <li><b>Doppelte Progression.</b> Oberes Ende in allen Sätzen erreicht → Gewicht erhöhen. Im Defizit ist Stagnation okay.</li>
+    <li><b>Sanft einsteigen.</b> Die ersten 2 Wochen ca. 2 Sätze pro Übung, dann volle Satzzahl. Die App macht das automatisch.</li>
+  </ol>
+  <p class="small"><b>Hinweis Arme:</b> Seitliche Schultern machen die Arme optisch breiter und definierter – deshalb ist Seitheben fest im Plan.</p>
+</details>
+<details>
+  <summary>RIR und doppelte Progression</summary>
+  <p><b>RIR</b> = Wiederholungen im Tank: Wie viele saubere Wiederholungen wären am Ende des Satzes noch gegangen?</p>
+  <table>
+    <tr><td><b>0</b></td><td>Nichts geht mehr – letzter Satz einer Isolationsübung.</td></tr>
+    <tr><td><b>1</b></td><td>Eine wäre noch gegangen.</td></tr>
+    <tr><td><b>2</b></td><td>Zwei wären noch gegangen – typisch für Grundübungen.</td></tr>
+    <tr><td><b>3+</b></td><td>Zu leicht – nur in Aufwärmsätzen.</td></tr>
+  </table>
+  <p><b>Doppelte Progression:</b> erst die Wiederholungen steigern, dann das Gewicht. Schaffst du das obere Ende in allen Sätzen, erhöhst du beim nächsten Mal um den kleinsten Schritt (meist 1–2,5 kg). Die App zeigt dir das automatisch an.</p>
+  <p class="small">Beispiel 3 × 6–10: 20 kg → 10/8/7 → 10/9/8 → 10/10/10 → nächstes Mal 22 kg → 8/7/6 …</p>
+  <p class="small"><b>Tipp:</b> Am Anfang unterschätzt fast jeder, wie viel noch geht. Teste ab und zu im letzten Satz einer Maschinen- oder Kabelübung, was wirklich möglich ist. Bei freien Grundübungen nicht ins Versagen gehen.</p>
+</details>
+<details>
+  <summary>⚠️ Linker Oberschenkel – nicht triggern</summary>
+  <p><b>MEIDEN:</b> alle Ausfallschritt-Varianten (vorwärts, rückwärts, gehend), Bulgarian Split Squats, Split Squats, Sissy Squats. Aus derselben Logik auch: Kickbacks (Bein nach hinten), Beinschwünge nach hinten, Dehnungen der Hüftvorderseite, Schrittstellung mit linkem Bein hinten bei Kabelübungen.</p>
+  <p><b>VORSICHTIG:</b> Beinstrecker mit weit nach hinten gelehnter Rückenlehne. Lehne aufrecht stellen, falls es zieht.</p>
+  <p><b>UNPROBLEMATISCH:</b> Beinpresse, Hackenschmidt, Kniebeuge, Rumänisches Kreuzheben, Hip Thrust (Hüfte höchstens bis neutral).</p>
+  <p><b>Neue Übungen immer erst mit leichtem Gewicht testen.</b></p>
+</details>
+<details>
+  <summary>Bauchfett und Alltag</summary>
+  <p><b>Spot Reduction gibt es nicht</b> (Meta-Analyse Ramírez-Campillo 2022). Bauchfett geht über das Defizit weg, oft als Letztes. Bauchtraining sorgt dafür, dass darunter etwas Sichtbares wartet.</p>
+  <ul>
+    <li>8.000–10.000 Schritte pro Tag</li>
+    <li>7–9 Stunden Schlaf</li>
+    <li>Optional 1–2× pro Woche 20–30 Min lockeres Cardio</li>
+  </ul>
+</details>
+<details>
+  <summary>Fahrplan bis Juni 2027</summary>
+  <table>
+    <tr><th>Zeitraum</th><th>kcal</th><th>Was</th></tr>
+    <tr><td>Woche 1–15<br><span class="muted">02.11.26–14.02.27</span></td><td>~2.250</td><td>Leichtes Defizit, 0,3–0,5 kg/Woche</td></tr>
+    <tr><td>Woche 8<br><span class="muted">Weihnachten</span></td><td>~2.600</td><td>Erhaltung ohne schlechtes Gewissen</td></tr>
+    <tr><td>Woche 16–17<br><span class="muted">2. Hälfte Februar</span></td><td>~2.600</td><td>Diät-Pause, danach Check</td></tr>
+    <tr><td>Woche 18–30<br><span class="muted">März–Mai</span></td><td>2.250 / 2.600</td><td>Je nach Check (in den Einstellungen wählen)</td></tr>
+    <tr><td>Juni</td><td>–</td><td><b>Ziel erreicht</b></td></tr>
+  </table>
+</details>
+<details>
+  <summary>Messen und Anpassen</summary>
+  <ul>
+    <li>Täglich morgens nüchtern wiegen, Wochenschnitt vergleichen.</li>
+    <li>Wöchentlich Bauchumfang auf Nabelhöhe – <b>wichtigster Wert</b>.</li>
+    <li>Alle 2 Wochen Fotos: gleiches Licht, gleiche Pose.</li>
+  </ul>
+  <p><b>Regeln</b> (die App prüft sie im Tab „Körper“):</p>
+  <ul>
+    <li>Wochenschnitt 3 Wochen lang &lt; 0,2 kg runter → 150 kcal weniger oder +2.000 Schritte.</li>
+    <li>Mehr als 0,6 kg pro Woche runter → +150 kcal.</li>
+    <li>Bauchumfang sinkt, Waage steht → Rekomposition läuft, nichts ändern.</li>
+  </ul>
+  <p class="small">Kreatin: 1–2 kg Wasser in der Muskulatur sind kein Fett.</p>
+</details>
+<details>
+  <summary>Realistische Erwartung</summary>
+  <p>Deutlich weniger Bauchfett und klar definiertere Arme, Brust und Schultern. Ein komplettes Sixpack hängt davon ab, wo dein Körper zuletzt Fett abgibt.</p>
+</details>
+</template>
+
+<script>
+const DATA = {"version": "1.0.0", "days": [{"short": "OK-A", "title": "Oberkörper A – Brust-Fokus", "tag": "Montag", "warmup": ["3 Min locker auf Fahrradergometer oder Rudergerät (leicht ins Schwitzen kommen).", "10× Armkreisen vorwärts und 10× rückwärts.", "15× Band Pull-Aparts (Gummiband vor der Brust auseinanderziehen) oder leichte Face Pulls am Kabel.", "10× Schulter-Außenrotation am Kabel pro Seite, sehr leicht.", "10× Schulterblatt-Liegestütze (nur die Schulterblätter bewegen, Arme bleiben gestreckt)."], "warmsets": "Schrägbankdrücken: 1× ca. 50 % des Arbeitsgewichts × 8–10, dann 1× ca. 75 % × 3–5. Danach die Arbeitssätze.", "items": [{"id": "1", "nr": "1", "key": "schraegbank", "n": 3, "lo": 6, "hi": 10, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Schrägbankdrücken KH oder Multipresse", "note": "", "compound": true}, {"id": "2", "nr": "2", "key": "klimmzug", "n": 3, "lo": 8, "hi": 12, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Klimmzüge (assistiert) / Latzug", "note": "", "compound": true}, {"id": "3", "nr": "3", "key": "brustpresse", "n": 3, "lo": 8, "hi": 12, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Brustpresse Maschine / Flachbank KH", "note": "", "compound": true}, {"id": "4", "nr": "4", "key": "kabelrudern", "n": 3, "lo": 8, "hi": 12, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Kabelrudern sitzend", "note": "", "compound": true}, {"id": "5", "nr": "5", "key": "seitheben", "n": 3, "lo": 12, "hi": 20, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Seitheben Kabel oder KH", "note": "", "compound": false}, {"id": "6", "nr": "6", "key": "bayesian", "n": 3, "lo": 8, "hi": 12, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Bayesian Cable Curl / SZ-Curls", "note": "", "compound": false}, {"id": "7", "nr": "7", "key": "ueberkopf", "n": 3, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Trizepsstrecken über Kopf am Kabel", "note": "", "compound": false}]}, {"short": "UK-A", "title": "Unterkörper A – Quad-Fokus + Bauch", "tag": "Dienstag", "warmup": ["3–4 Min locker auf dem Fahrradergometer.", "10× Kniebeuge mit Körpergewicht (gern auf eine Bank absetzen).", "10× Hüftbeugen mit Stab am Rücken (Good Morning ohne Gewicht).", "10× Glute Bridge am Boden – Hüfte nur bis gerade.", "8× Dead Bug pro Seite (Rückenlage, Arm und gegenüberliegendes Bein langsam strecken)."], "warmsets": "Hackenschmidt: 1× ca. 50 % × 8–10, dann 1× ca. 75 % × 3–5. Danach die Arbeitssätze.", "items": [{"id": "1", "nr": "1", "key": "hacken", "n": 3, "lo": 6, "hi": 10, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Hackenschmidt / Beinpresse / Kniebeuge", "note": "", "compound": true}, {"id": "2", "nr": "2", "key": "beinstrecker", "n": 3, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Beinstrecker", "note": "", "compound": false}, {"id": "3", "nr": "3", "key": "rdl", "n": 3, "lo": 8, "hi": 10, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Rumänisches Kreuzheben", "note": "", "compound": true}, {"id": "4", "nr": "4", "key": "beinbeuger_s", "n": 2, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Beinbeuger sitzend", "note": "", "compound": false}, {"id": "5", "nr": "5", "key": "kabelcrunch", "n": 3, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Kabel-Crunch", "note": "", "compound": false}, {"id": "6", "nr": "6", "key": "beinheben", "n": 3, "lo": 8, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Beinheben hängend oder im Stütz", "note": "", "compound": false}, {"id": "7a", "nr": "7", "key": "hammer", "n": 2, "lo": 12, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 0, "pauseTxt": "direkt weiter zu 7b", "superset": true, "pos": "a", "ssName": "Arm-Booster: Hammer Curls + Seitheben", "planName": "Arm-Booster: Hammer Curls + Seitheben", "note": "", "compound": false}, {"id": "7b", "nr": "7", "key": "seitheben", "n": 2, "lo": 12, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 75, "pauseTxt": "60–90 Sek", "superset": true, "pos": "b", "ssName": "Arm-Booster: Hammer Curls + Seitheben", "planName": "Arm-Booster: Hammer Curls + Seitheben", "note": "Im Superset direkt nach den Hammer Curls, 2 × 12–15. Leichteres Gewicht als am Montag, saubere Technik.", "compound": false}]}, {"short": "OK-B", "title": "Oberkörper B – Lat- und Arm-Fokus", "tag": "Donnerstag", "warmup": ["3 Min locker auf Fahrradergometer oder Rudergerät.", "10× Armkreisen vorwärts und 10× rückwärts.", "15× Band Pull-Aparts oder leichte Face Pulls am Kabel.", "10× Latzug sehr leicht, oben bewusst lang machen.", "10× Schulterblatt-Liegestütze."], "warmsets": "Latzug: 1× ca. 50 % × 10, dann 1× ca. 75 % × 4–5. Vor dem Flachbankdrücken zusätzlich 1 leichter Satz × 6–8.", "items": [{"id": "1", "nr": "1", "key": "latzug_eng", "n": 3, "lo": 8, "hi": 12, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Latzug, neutraler oder enger Griff", "note": "", "compound": true}, {"id": "2", "nr": "2", "key": "flachbank", "n": 3, "lo": 6, "hi": 10, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Flachbankdrücken LH oder KH", "note": "", "compound": true}, {"id": "3", "nr": "3", "key": "brustgest", "n": 3, "lo": 8, "hi": 12, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Brustgestütztes Rudern / T-Bar", "note": "", "compound": true}, {"id": "4", "nr": "4", "key": "flys", "n": 3, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Kabel-Flys / Butterfly", "note": "", "compound": false}, {"id": "5", "nr": "5", "key": "pullover", "n": 2, "lo": 12, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Lat-Pullover am Kabel", "note": "", "compound": false}, {"id": "6", "nr": "6", "key": "schraegcurls", "n": 3, "lo": 10, "hi": 12, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Schrägbank-Curls KH", "note": "", "compound": false}, {"id": "7", "nr": "7", "key": "dips", "n": 3, "lo": 8, "hi": 12, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Dips / Trizepsdrücken am Kabel", "note": "", "compound": true}, {"id": "8", "nr": "8", "key": "seitheben", "n": 3, "lo": 12, "hi": 20, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Seitheben", "note": "Letzte Übung des Tages: Der letzte Satz darf bis zum Muskelversagen gehen, danach optional Teilwiederholungen im unteren Drittel.", "compound": false}]}, {"short": "UK-B", "title": "Unterkörper B – Beine + Bauch", "tag": "Freitag oder Samstag", "warmup": ["3–4 Min locker auf dem Fahrradergometer.", "10× Kniebeuge mit Körpergewicht.", "10× Glute Bridge am Boden – Hüfte nur bis gerade.", "10× Hüftbeugen mit Stab am Rücken.", "10× Wadenheben und Fußgelenke kreisen."], "warmsets": "Beinpresse: 1× ca. 50 % × 10, dann 1× ca. 75 % × 5. Vor dem Hip Thrust 1 leichter Satz × 8.", "items": [{"id": "1", "nr": "1", "key": "beinpresse", "n": 3, "lo": 10, "hi": 15, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Beinpresse, höhere Wiederholungen", "note": "", "compound": true}, {"id": "2", "nr": "2", "key": "hipthrust", "n": 3, "lo": 8, "hi": 12, "rir": "1–2", "pauseSec": 150, "pauseTxt": "2–3 Min", "superset": false, "pos": "", "ssName": "", "planName": "Hip Thrust", "note": "", "compound": true}, {"id": "3", "nr": "3", "key": "beinstrecker", "n": 3, "lo": 12, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Beinstrecker (im letzten Satz lange Teilwiederholungen dranhängen)", "note": "<b>Im letzten Satz lange Teilwiederholungen dranhängen:<\/b> Wenn keine volle Wiederholung mehr geht, noch 5–8 halbe Wiederholungen im unteren, gebeugten Bereich (von tief gebeugt bis etwa zur halben Streckung).", "compound": false}, {"id": "4", "nr": "4", "key": "beinbeuger_l", "n": 3, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Beinbeuger liegend", "note": "", "compound": false}, {"id": "5", "nr": "5", "key": "abwheel", "n": 3, "lo": 8, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 90, "pauseTxt": "1–2 Min", "superset": false, "pos": "", "ssName": "", "planName": "Ab-Wheel / Crunch-Maschine", "note": "", "compound": false}, {"id": "6a", "nr": "6", "key": "szcurls", "n": 2, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 0, "pauseTxt": "direkt weiter zu 6b", "superset": true, "pos": "a", "ssName": "Arm-Superset: Curls + Trizepsdrücken", "planName": "Arm-Superset: Curls + Trizepsdrücken", "note": "", "compound": false}, {"id": "6b", "nr": "6", "key": "pushdown", "n": 2, "lo": 10, "hi": 15, "rir": "0–1 · letzter Satz: Versagen ok", "pauseSec": 75, "pauseTxt": "60–90 Sek", "superset": true, "pos": "b", "ssName": "Arm-Superset: Curls + Trizepsdrücken", "planName": "Arm-Superset: Curls + Trizepsdrücken", "note": "", "compound": false}]}], "ex": {"schraegbank": {"name": "Schrägbankdrücken mit Kurzhanteln", "ziel": "Obere Brust (Schlüsselbein-Anteil des großen Brustmuskels); vordere Schulter und Trizeps helfen mit.", "setup": "Bank auf ca. 30° stellen (meist 2.–3. Raste) – steiler wird es zur Schulterübung. Füße fest am Boden, Gesäß bleibt auf der Bank. Schulterblätter zusammen- und nach unten ziehen, leichtes natürliches Hohlkreuz. Hanteln auf die Oberschenkel stellen und beim Zurücklehnen mit Schwung aus den Knien hochbringen.", "ablauf": ["Hanteln über der oberen Brust, Arme fast gestreckt, Handflächen nach vorn oder leicht zueinander.", "Kontrolliert absenken, Ellbogen ca. 45–60° vom Körper, bis die Hanteln seitlich auf Brusthöhe sind und du die Dehnung in der Brust spürst.", "Ohne Pause unten kraftvoll hochdrücken, die Hanteln auf einem leichten Bogen etwas zueinander führen.", "Oben nicht aneinanderschlagen, Spannung halten, nächste Wiederholung."], "atmung": "Beim Absenken einatmen, beim Hochdrücken ausatmen.", "tempo": "2–3 Sek. ablassen, unten ca. 1 Sek. kontrolliert in der Dehnung, zügig hochdrücken.", "fehler": ["Bank zu steil (über 45°): Die Schulter übernimmt statt der oberen Brust.", "Schulterblätter lösen sich, Schultern rollen nach vorn.", "Zu kurzer Weg: Hanteln stoppen weit über der Brust."], "dehnung": "Die tiefe Position ist der wertvollste Teil – so tief, wie es sich für die Schulter gut anfühlt.", "pause": "2–3 Min (Grundübung)", "alt": [["Multipresse schräg", "Bank (30°) so unter die Stange stellen, dass sie die obere Brust trifft. Sicherheitsstopper knapp über Brusthöhe einstellen, Stange zur oberen Brust absenken, hochdrücken."], ["Schrägbank-Maschine", "Sitz so einstellen, dass die Griffe auf Höhe der oberen Brust liegen; Ausführung wie oben."]], "variants": ["Schrägbankdrücken mit Kurzhanteln", "Multipresse schräg", "Schrägbank-Maschine"], "assist": []}, "klimmzug": {"name": "Klimmzüge (assistiert)", "ziel": "Breiter Rückenmuskel (Lat), oberer Rücken; Bizeps hilft mit.", "setup": "An der Klimmzug-Maschine mit den Knien auf die Plattform. Gegengewicht so wählen, dass 8–12 saubere Wiederholungen gelingen (mehr Gegengewicht = mehr Hilfe). Griff etwas breiter als schulterbreit mit Handflächen nach vorn – oder neutral (Handflächen zueinander), wenn die Maschine das anbietet.", "ablauf": ["Mit gestreckten Armen hängen, die Schultern dürfen nach oben gehen (Dehnung im Lat).", "Bewegung starten, indem du die Schultern nach unten ziehst.", "Ellbogen seitlich nach unten Richtung Hüfte ziehen, bis das Kinn über der Stange ist.", "Kontrolliert ablassen, bis die Arme wieder vollständig gestreckt sind."], "atmung": "Beim Hochziehen ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 2–3 Sek. runter, unten kurz aushängen.", "fehler": ["Schwung aus Beinen oder Oberkörper.", "Halbe Wiederholungen ohne vollständige Streckung unten.", "Kinn nach vorn recken, statt die Ellbogen nach unten zu ziehen."], "dehnung": "Unten ganz aushängen – die gestreckte Position ist für den Lat besonders wirksam.", "pause": "2–3 Min (Grundübung)", "alt": [["Latzug (breiter Griff)", "Oberschenkel fest unter die Polster, Stange etwas breiter als schulterbreit greifen, Oberkörper leicht zurücklehnen, Stange zur oberen Brust ziehen, oben vollständig strecken."], ["Gummiband-Klimmzug", "Band um die Stange, Knie oder Fuß ins Band; Ausführung wie oben."]], "bein": "An der Maschine knien – die Beine werden dabei nicht nach hinten gestreckt. Freie Klimmzüge: Beine locker unter dem Körper oder leicht nach vorn, nicht nach hinten durchstrecken.", "variants": ["Klimmzüge (assistiert)", "Latzug (breiter Griff)", "Gummiband-Klimmzug"], "assist": [0]}, "brustpresse": {"name": "Brustpresse an der Maschine", "ziel": "Brust (mittlerer und unterer Anteil); vordere Schulter und Trizeps helfen mit.", "setup": "Sitzhöhe so einstellen, dass die Griffe auf Höhe der Brustmitte oder knapp darunter liegen. Falls verstellbar: Griffe so, dass sie in der Startposition leicht hinter dem Brustkorb liegen (gute Dehnung). Schulterblätter zurück und nach unten, Rücken an der Lehne, Füße fest am Boden.", "ablauf": ["Griffe fassen, Handgelenke gerade.", "Nach vorn drücken, bis die Arme fast gestreckt sind – nicht durchdrücken.", "Kontrolliert zurück, bis du eine deutliche Dehnung in der Brust spürst.", "Gewicht zwischen den Wiederholungen nicht ablegen."], "atmung": "Beim Drücken ausatmen, beim Zurückführen einatmen.", "tempo": "Ca. 1 Sek. drücken, 2–3 Sek. zurück.", "fehler": ["Sitz zu hoch oder zu tief – dann arbeitet die Schulter statt der Brust.", "Schultern lösen sich vom Polster und kommen nach vorn.", "Gewichte zwischen den Wiederholungen absetzen (Spannung geht verloren)."], "dehnung": "Nach hinten so weit gehen, wie es für die Schulter angenehm ist – dort liegt der Wachstumsreiz.", "pause": "2–3 Min (Grundübung)", "alt": [["Flachbankdrücken mit Kurzhanteln", "Wie Schrägbankdrücken, aber auf flacher Bank. Hanteln bis auf Brusthöhe absenken, Ellbogen ca. 45–60° vom Körper."]], "variants": ["Brustpresse an der Maschine", "Flachbankdrücken mit Kurzhanteln"], "assist": []}, "kabelrudern": {"name": "Kabelrudern sitzend", "ziel": "Mittlerer und oberer Rücken (Rhomboiden, mittlerer Trapez), Lat, hintere Schulter; Bizeps hilft mit.", "setup": "Füße auf die Trittplatten, Knie leicht gebeugt. Enger V-Griff (Handflächen zueinander) oder breite Stange. Aufrecht sitzen, Brust raus.", "ablauf": ["Griff mit gestreckten Armen halten; Schultern dürfen nach vorn gezogen werden, Oberkörper leicht nach vorn geneigt (ca. 10–15°).", "Zuerst die Schulterblätter zurückziehen, dann die Ellbogen eng am Körper nach hinten ziehen, bis der Griff am Bauch ist.", "Den Oberkörper dabei nur bis aufrecht bringen, nicht nach hinten lehnen.", "Kontrolliert nach vorn lassen, bis du die Dehnung zwischen den Schulterblättern und im Lat spürst."], "atmung": "Beim Ziehen ausatmen, beim Nachvorne-Lassen einatmen.", "tempo": "Ca. 1 Sek. ziehen, hinten kurz halten, 2–3 Sek. zurück.", "fehler": ["Mit dem Oberkörper weit zurückschaukeln (Schwung).", "Schultern Richtung Ohren hochziehen.", "Runder Rücken in der vorderen Position unter Last."], "dehnung": "Vorn ganz lang werden lassen – aber mit geradem Rücken.", "pause": "2–3 Min (Grundübung)", "alt": [["Rudermaschine mit Brustpolster", "Brust ans Polster, Griffe mit gestreckten Armen fassen, Ellbogen nach hinten ziehen."], ["Kurzhantel-Rudern einarmig", "Freie Hand auf der Bank abstützen, beide Füße am Boden, Hantel zur Hüfte ziehen."]], "variants": ["Kabelrudern sitzend", "Rudermaschine mit Brustpolster", "Kurzhantel-Rudern einarmig"], "assist": []}, "seitheben": {"name": "Seitheben am Kabel oder mit Kurzhanteln", "ziel": "Seitlicher Deltamuskel – macht Schultern und Arme optisch breiter.", "setup": "<b>Kabel:<\/b> Rolle ganz unten, seitlich zum Turm stehen, Einzelgriff mit der Hand, die vom Turm weg zeigt; mit der anderen Hand am Turm festhalten. Füße parallel, hüftbreit. <b>Kurzhanteln:<\/b> aufrecht stehen oder sitzen, Oberkörper ganz leicht nach vorn geneigt.", "ablauf": ["Arm leicht gebeugt (ca. 10–20°) – dieser Winkel bleibt die ganze Zeit gleich.", "Arm seitlich und leicht vor dem Körper anheben, der Ellbogen führt, bis der Oberarm etwa parallel zum Boden ist.", "Hand bleibt neutral – nicht den Daumen nach oben drehen.", "Kurz halten, dann kontrolliert absenken."], "atmung": "Beim Anheben ausatmen, beim Absenken einatmen; ruhig weiteratmen.", "tempo": "1–2 Sek. hoch, 2–3 Sek. runter.", "fehler": ["Zu schwer – Schwung aus dem Oberkörper.", "Schultern Richtung Ohren hochziehen (dann arbeitet der Nacken).", "Ellbogen stark beugen – die Bewegung wird zu kurz."], "dehnung": "Am Kabel ist der Widerstand unten (gedehnter Muskel) höher als mit Kurzhanteln – darum Kabel bevorzugen. Im letzten Satz kannst du nach dem Versagen noch Teilwiederholungen im unteren Drittel anhängen.", "pause": "1–2 Min (Isolation)", "alt": [["Seitheben-Maschine", "Sitz so einstellen, dass die Drehachse auf Schulterhöhe liegt; Arme seitlich gegen die Polster heben."], ["Seitheben sitzend mit Kurzhanteln", "Auf der Bankkante, Ausführung wie oben – weniger Schwung möglich."]], "variants": ["Seitheben am Kabel oder mit Kurzhanteln", "Seitheben-Maschine", "Seitheben sitzend mit Kurzhanteln"], "assist": []}, "bayesian": {"name": "Bayesian Cable Curl", "ziel": "Bizeps, besonders in der gedehnten Position; Oberarmmuskel (Brachialis) hilft mit.", "setup": "Kabelrolle ganz unten, Einzelgriff. Rücken zum Turm, einen kleinen Schritt nach vorn gehen, sodass der Arm leicht hinter dem Körper hängt. <b>Füße parallel, hüftbreit<\/b>, Oberkörper aufrecht.", "ablauf": ["Arm hängt gestreckt leicht hinter dem Körper, Handfläche zeigt nach vorn.", "Unterarm nach vorn oben beugen; der Ellbogen bleibt hinten und bewegt sich kaum.", "Oben kurz anspannen.", "Langsam ablassen, bis der Arm ganz gestreckt ist."], "atmung": "Beim Beugen ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 2–3 Sek. runter.", "fehler": ["Ellbogen wandert nach vorn – die Dehnung geht verloren.", "Oberkörper dreht oder schaukelt mit.", "Arm unten nicht ganz strecken."], "dehnung": "Das ist der Sinn der Übung: Der Arm hinter dem Körper dehnt den Bizeps. Die untere Hälfte ist der wichtigste Teil.", "pause": "1–2 Min (Isolation)", "alt": [["SZ-Curls", "SZ-Stange schulterbreit greifen, Ellbogen seitlich am Körper, Stange hochbeugen, unten ganz strecken."], ["Schrägbank-Curls mit Kurzhanteln", "Bank 45–60°, Arme hängen senkrecht nach unten, Ausführung wie oben."]], "bein": "KEINE Schrittstellung mit dem linken Bein hinten. Steh parallel – oder, falls du eine Schrittstellung brauchst, nur mit dem RECHTEN Bein hinten.", "variants": ["Bayesian Cable Curl", "SZ-Curls", "Schrägbank-Curls mit Kurzhanteln"], "assist": []}, "ueberkopf": {"name": "Trizepsstrecken über Kopf am Kabel", "ziel": "Trizeps, vor allem der lange Kopf – der größte Teil des Trizeps, der über Kopf am stärksten gedehnt wird.", "setup": "Seil an der Kabelrolle auf ca. Hüft- bis Brusthöhe. Rücken zum Turm, Seil über den Kopf nehmen. Oberkörper leicht nach vorn geneigt, Bauch fest. <b>Stand: parallel<\/b> mit leicht gebeugten Knien.", "ablauf": ["Oberarme neben dem Kopf, Ellbogen zeigen nach vorn, Hände hinter dem Kopf – Trizeps gedehnt.", "Unterarme nach vorn oben strecken, bis die Arme gestreckt sind.", "Die Ellbogen bleiben dabei an ihrer Position.", "Langsam zurück in die tiefe Dehnung."], "atmung": "Beim Strecken ausatmen, beim Zurückführen einatmen.", "tempo": "Ca. 1 Sek. strecken, 2–3 Sek. zurück.", "fehler": ["Ellbogen gehen weit auseinander.", "Hohlkreuz statt festem Rumpf.", "Zu wenig tief zurück – die Dehnung fehlt."], "dehnung": "Hinter dem Kopf tief zurückgehen: Genau dort wächst der lange Trizepskopf besonders gut.", "pause": "1–2 Min (Isolation)", "alt": [["Kurzhantel-Trizepsstrecken über Kopf", "Sitzend auf einer Bank mit Rückenlehne, eine Hantel mit beiden Händen hinter den Kopf ablassen und strecken."], ["SZ-French-Press auf der Schrägbank", "Bank ca. 30°, Stange hinter den Kopf ablassen, Oberarme bleiben steil."]], "bein": "Keine Schrittstellung mit dem linken Bein hinten. Parallel stehen oder sitzend die Kurzhantel-Variante nehmen.", "variants": ["Trizepsstrecken über Kopf am Kabel", "Kurzhantel-Trizepsstrecken über Kopf", "SZ-French-Press auf der Schrägbank"], "assist": []}, "hacken": {"name": "Hackenschmidt-Kniebeuge (Hack Squat)", "ziel": "Quadrizeps; Gesäß und Adduktoren helfen mit.", "setup": "Rücken und Schultern ans Polster. Füße schulterbreit etwa in der Mitte der Plattform, Zehen leicht nach außen. Füße tiefer = mehr Quadrizeps, höher = mehr Gesäß. Sicherung lösen.", "ablauf": ["Kontrolliert in die Tiefe gehen, die Knie wandern Richtung Zehen nach vorn und leicht nach außen.", "So tief, wie der untere Rücken am Polster bleibt – Ziel: Oberschenkel mindestens parallel zur Plattform.", "Über die ganze Fußsohle kraftvoll hochdrücken.", "Oben die Knie nicht komplett durchdrücken."], "atmung": "Oben einatmen und den Bauch fest anspannen, runtergehen, beim Hochdrücken ausatmen.", "tempo": "2–3 Sek. runter, unten nicht abfedern, kraftvoll hoch.", "fehler": ["Fersen heben ab.", "Knie fallen nach innen.", "Zu wenig Tiefe."], "dehnung": "Die tiefe Position ist für den Quadrizeps der wirksamste Teil.", "pause": "2–3 Min (Grundübung)", "alt": [["Beinpresse", "Rücken und Gesäß am Polster, Füße schulterbreit, eher mittig-tief; so tief, wie das Gesäß nicht abhebt."], ["Kniebeuge mit Langhantel", "Stange auf dem oberen Trapez, Füße schulterbreit, Brust aufrecht, mindestens bis parallel."]], "bein": "UNPROBLEMATISCH – die Hüfte wird hier nicht hinter den Körper gestreckt.", "variants": ["Hackenschmidt-Kniebeuge (Hack Squat)", "Beinpresse", "Kniebeuge mit Langhantel"], "assist": []}, "beinstrecker": {"name": "Beinstrecker", "ziel": "Quadrizeps (alle vier Köpfe, inklusive gerader Oberschenkelmuskel).", "setup": "Kniegelenk auf Höhe der Drehachse ausrichten. Fußpolster vorn knapp über dem Sprunggelenk. <b>Rückenlehne aufrecht<\/b> (siehe Hinweis unten). Griffe fassen, Gesäß fest in den Sitz.", "ablauf": ["Beine bis fast ganz gestreckt hochbringen.", "Oben ca. 1 Sek. fest anspannen.", "Langsam ablassen, bis die Knie wieder tief gebeugt sind (ca. 90° oder mehr)."], "atmung": "Beim Strecken ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 1 Sek. halten, 2–3 Sek. runter.", "fehler": ["Gesäß hebt vom Sitz ab.", "Schwung statt kontrollierter Bewegung.", "Gewicht unten fallen lassen."], "dehnung": "Die tief gebeugte Position unten ist die gedehnte Position – dort nicht abkürzen.", "pause": "1–2 Min (Isolation)", "alt": [["Beinpresse mit tiefem, engem Fußstand", "Füße hüftbreit unten auf der Plattform: betont den Quadrizeps."], ["Hackenschmidt mit tiefem Fußstand", "Wie oben, Füße tiefer auf der Plattform."]], "bein": "VORSICHTIG: Eine weit nach hinten gelehnte Rückenlehne streckt die Hüfte. Lehne aufrecht stellen, falls es zieht. KEINE Sissy Squats als Ersatz.", "variants": ["Beinstrecker", "Beinpresse mit tiefem, engem Fußstand", "Hackenschmidt mit tiefem Fußstand"], "assist": []}, "rdl": {"name": "Rumänisches Kreuzheben", "ziel": "Beinbeuger und Gesäß; der untere Rücken hält die Position.", "setup": "Langhantel (oder zwei Kurzhanteln) vor den Oberschenkeln, hüftbreiter Stand, Griff knapp schulterbreit. Knie leicht gebeugt (ca. 15–20°) – dieser Winkel bleibt.", "ablauf": ["Hüfte nach hinten schieben (wie eine Autotür mit dem Po schließen), der Oberkörper neigt sich mit geradem Rücken nach vorn.", "Stange nah an den Beinen nach unten gleiten lassen, bis du eine deutliche Dehnung in den Beinbeugern spürst (meist knapp unter dem Knie bis Mitte Schienbein).", "Hüfte nach vorn schieben, bis du aufrecht stehst.", "Oben nur bis gerade – nicht ins Hohlkreuz überstrecken."], "atmung": "Oben einatmen und den Bauch fest anspannen, beim Hochkommen ausatmen.", "tempo": "Ca. 3 Sek. runter, kurz in der Dehnung, zügig hoch.", "fehler": ["Runder Rücken.", "Kniebeuge statt Hüftbeuge (Knie gehen zu weit nach vorn).", "Stange entfernt sich vom Körper."], "dehnung": "Die tiefste Position mit gedehnten Beinbeugern ist der wichtigste Teil der Übung.", "pause": "2–3 Min (Grundübung)", "alt": [["Rumänisches Kreuzheben mit Kurzhanteln", "Ausführung identisch, Hanteln vor den Oberschenkeln."], ["45°-Rückenstrecker mit Hüftfokus", "Polster unterhalb der Hüftknochen, aus der Hüfte beugen, oben nur bis Körper gerade."]], "bein": "UNPROBLEMATISCH – die Hüfte wird nur bis neutral (aufrecht) gestreckt.", "variants": ["Rumänisches Kreuzheben", "Rumänisches Kreuzheben mit Kurzhanteln", "45°-Rückenstrecker mit Hüftfokus"], "assist": []}, "beinbeuger_s": {"name": "Beinbeuger sitzend", "ziel": "Beinbeuger – sitzend werden sie stärker gedehnt als liegend, das ist für das Wachstum günstig.", "setup": "Kniegelenk auf Höhe der Drehachse. Unterschenkelpolster über der Ferse bzw. Achillessehne. Oberschenkelpolster fest auf die Oberschenkel knapp über den Knien.", "ablauf": ["Fersen nach unten hinten ziehen, bis die Knie maximal gebeugt sind.", "Kurz halten.", "Kontrolliert zurück, bis die Beine fast gestreckt sind.", "Oberkörper dabei ruhig leicht nach vorn lehnen – mehr Dehnung."], "atmung": "Beim Beugen ausatmen, beim Zurückführen einatmen.", "tempo": "Ca. 1 Sek. beugen, 2–3 Sek. zurück.", "fehler": ["Gesäß hebt ab, weil das Oberschenkelpolster zu locker ist.", "Schwung.", "Nicht ganz zurück in die Streckung."], "dehnung": "Vorn fast ganz strecken – das ist die gedehnte Position.", "pause": "1–2 Min (Isolation)", "alt": [["Beinbeuger liegend", "Siehe Unterkörper B."]], "variants": ["Beinbeuger sitzend", "Beinbeuger liegend"], "assist": []}, "kabelcrunch": {"name": "Kabel-Crunch", "ziel": "Gerader Bauchmuskel (\"Sixpack-Muskel\").", "setup": "Seil an der oberen Rolle. Vor dem Turm knien (ca. 1 Schritt Abstand), Seilenden neben dem Kopf halten. Hüfte bleibt hoch über den Knien.", "ablauf": ["Wirbelsäule einrollen: Brustbein Richtung Becken, Ellbogen Richtung Oberschenkel.", "Die Hüfte bewegt sich kaum – sonst ziehst du nur mit dem Körpergewicht.", "Unten ca. 1 Sek. fest anspannen.", "Langsam wieder aufrollen, bis der Bauch lang ist."], "atmung": "Beim Einrollen kräftig ausatmen, beim Aufrollen einatmen.", "tempo": "Ca. 1 Sek. einrollen, 1 Sek. halten, 2 Sek. aufrollen.", "fehler": ["Aus der Hüfte nach unten ziehen statt einzurollen.", "Mit den Armen ziehen.", "Zu schweres Gewicht."], "dehnung": "Oben den Bauch bewusst lang werden lassen.", "pause": "1–2 Min (Isolation)", "alt": [["Crunch-Maschine", "Polster an Brust/Schultern, Bewegung durch Einrollen des Oberkörpers."], ["Crunch mit Gewichtsscheibe", "Auf dem Boden oder einer Matte, Scheibe vor der Brust."]], "variants": ["Kabel-Crunch", "Crunch-Maschine", "Crunch mit Gewichtsscheibe"], "assist": []}, "beinheben": {"name": "Beinheben hängend oder im Stütz", "ziel": "Gerader Bauchmuskel (vor allem durch das Einrollen des Beckens); Hüftbeuger helfen mit.", "setup": "Hängend an der Klimmzugstange oder im Stütz am Kapitänsstuhl (Unterarme auf den Polstern, Rücken an der Lehne).", "ablauf": ["Beine hängen locker und leicht gebeugt unter dem Körper.", "Knie bzw. Beine anheben.", "Zum Schluss das Becken einrollen (Po nach vorn oben) – erst das macht es zur Bauchübung.", "Langsam ablassen, ohne zu schwingen."], "atmung": "Beim Anheben ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 2–3 Sek. runter.", "fehler": ["Schwung holen.", "Nur die Beine heben, ohne das Becken einzurollen.", "Unten ins Hohlkreuz fallen."], "dehnung": null, "pause": "1–2 Min (Isolation)", "alt": [["Reverse Crunch auf der Bank", "Rückenlage, an der Bank festhalten, Knie zur Brust, Becken einrollen."], ["Progression", "Erst angewinkelte Knie, später gestreckte Beine."]], "bein": "Beine unten nicht nach hinten pendeln lassen – sie bleiben unter oder leicht vor dem Körper.", "variants": ["Beinheben hängend oder im Stütz", "Reverse Crunch auf der Bank"], "assist": []}, "hammer": {"name": "Hammer Curls", "ziel": "Oberarmmuskel (Brachialis) und Unterarm (Brachioradialis), dazu Bizeps – macht den Oberarm dicker.", "setup": "Stehend oder sitzend, Kurzhanteln im neutralen Griff (Daumen zeigen nach vorn), Ellbogen seitlich am Körper.", "ablauf": ["Arme hängen gestreckt.", "Hanteln im Hammergriff hochbeugen, der Ellbogen bleibt am Körper.", "Oben kurz anspannen.", "Langsam ablassen, bis die Arme ganz gestreckt sind."], "atmung": "Beim Beugen ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 2–3 Sek. runter.", "fehler": ["Schwung aus dem Rücken.", "Ellbogen wandern nach vorn.", "Unten nicht ganz strecken."], "dehnung": null, "pause": "1–2 Min (Isolation)", "alt": [["Seil-Hammer-Curls am Kabel", "Seil an der unteren Rolle, neutraler Griff, Ausführung wie oben."]], "variants": ["Hammer Curls", "Seil-Hammer-Curls am Kabel"], "assist": []}, "latzug_eng": {"name": "Latzug mit neutralem oder engem Griff", "ziel": "Breiter Rückenmuskel (Lat), besonders der untere Anteil, und großer Rundmuskel; Bizeps hilft mit.", "setup": "V-Griff oder breiter Parallelgriff (Handflächen zueinander). Oberschenkel fest unter die Polster.", "ablauf": ["Mit ganz gestreckten Armen beginnen, die Schultern dürfen nach oben gehen (Dehnung).", "Schultern nach unten ziehen, dann die Ellbogen Richtung Hüfte ziehen.", "Griff zur oberen Brust, Oberkörper dabei leicht zurückgelehnt (ca. 10–20°).", "Kontrolliert nach oben lassen, bis die Arme ganz gestreckt sind."], "atmung": "Beim Ziehen ausatmen, beim Hochlassen einatmen.", "tempo": "Ca. 1 Sek. ziehen, 2–3 Sek. hoch.", "fehler": ["Mit dem Oberkörper weit nach hinten schwingen.", "Oben nicht ganz strecken.", "Nur mit den Armen ziehen statt mit dem Rücken."], "dehnung": "Oben die Arme ganz strecken und den Lat lang machen.", "pause": "2–3 Min (Grundübung)", "alt": [["Klimmzüge (assistiert), neutraler Griff", "Siehe Oberkörper A."], ["Einarmiger Latzug sitzend", "Einzelgriff am Latzug, Ellbogen zur Hüfte ziehen – gute Dehnung oben."]], "variants": ["Latzug mit neutralem oder engem Griff", "Klimmzüge (assistiert), neutraler Griff", "Einarmiger Latzug sitzend"], "assist": []}, "flachbank": {"name": "Flachbankdrücken mit Langhantel oder Kurzhanteln", "ziel": "Brust gesamt; vordere Schulter und Trizeps helfen mit.", "setup": "<b>Langhantel:<\/b> Augen unter der Stange, Griff etwas breiter als schulterbreit (unten stehen die Unterarme senkrecht). Schulterblätter zusammen und nach unten, Füße fest am Boden, Gesäß auf der Bank. Im Rack mit Sicherungsablagen oder mit Partner trainieren.", "ablauf": ["Stange ausheben und über die Schultern bringen.", "Kontrolliert zur unteren Brust absenken, Ellbogen ca. 45–70° vom Körper.", "Die Brust kurz berühren, nicht abfedern.", "Hochdrücken, dabei leicht Richtung Gesicht."], "atmung": "Oben einatmen, Spannung halten, beim Hochdrücken ausatmen.", "tempo": "2–3 Sek. runter, kurz berühren, kraftvoll hoch.", "fehler": ["Ellbogen 90° seitlich abgespreizt (belastet die Schulter).", "Stange von der Brust abfedern.", "Gesäß hebt von der Bank ab."], "dehnung": "Mit Kurzhanteln ist ein tieferer Weg möglich – dort ist die Brust stärker gedehnt.", "pause": "2–3 Min (Grundübung)", "alt": [["Kurzhanteln flach", "Hanteln seitlich bis auf Brusthöhe absenken, Ellbogen ca. 45–60°."], ["Multipresse flach / Brustpresse", "Stopper knapp über Brusthöhe; Ausführung wie oben."]], "variants": ["Flachbankdrücken mit Langhantel oder Kurzhanteln", "Kurzhanteln flach", "Multipresse flach / Brustpresse"], "assist": []}, "brustgest": {"name": "Brustgestütztes Rudern / T-Bar", "ziel": "Oberer und mittlerer Rücken, Lat, hintere Schulter.", "setup": "Brustpolster so einstellen, dass du die Griffe mit gestreckten Armen gerade erreichst. Die Brust bleibt während des ganzen Satzes am Polster.", "ablauf": ["Arme gestreckt, Schultern dürfen nach vorn sinken.", "Schulterblätter zurückziehen, dann die Ellbogen nach hinten ziehen, bis die Griffe am Körper sind.", "Kurz halten.", "Kontrolliert ablassen, bis die Arme wieder gestreckt sind."], "atmung": "Beim Ziehen ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. ziehen, kurz halten, 2–3 Sek. runter.", "fehler": ["Brust hebt vom Polster ab.", "Schwung aus dem Oberkörper.", "Schultern Richtung Ohren hochziehen."], "dehnung": "Unten die Schulterblätter bewusst weit auseinander gleiten lassen.", "pause": "2–3 Min (Grundübung)", "alt": [["Kurzhantel-Rudern auf der Schrägbank", "Bauchlage auf Bank ca. 30–45°, Hanteln zur Hüfte ziehen."], ["Kabelrudern sitzend", "Siehe Oberkörper A."]], "bein": "Bei der Bauchlage auf der Schrägbank die Beine nicht nach hinten durchstrecken: Füße auf den Boden, Knie leicht gebeugt. Zieht es trotzdem – Maschine nehmen.", "variants": ["Brustgestütztes Rudern / T-Bar", "Kurzhantel-Rudern auf der Schrägbank", "Kabelrudern sitzend"], "assist": []}, "flys": {"name": "Kabel-Flys / Butterfly", "ziel": "Brust als Isolationsübung.", "setup": "<b>Kabel:<\/b> Rollen auf Schulterhöhe oder etwas darunter, Griffe fassen, in die Mitte stellen – <b>Füße parallel<\/b> (keine Schrittstellung mit linkem Bein hinten). <b>Butterfly:<\/b> Sitz so, dass die Griffe auf Brusthöhe sind, Rücken fest an der Lehne.", "ablauf": ["Arme leicht gebeugt, weit geöffnet, bis du die Dehnung in der Brust spürst.", "Arme in einem großen Bogen vor der Brust zusammenführen (wie einen Baum umarmen).", "Kurz zusammendrücken.", "Langsam wieder öffnen."], "atmung": "Beim Zusammenführen ausatmen, beim Öffnen einatmen.", "tempo": "Ca. 1 Sek. zusammen, 2–3 Sek. öffnen.", "fehler": ["Ellbogen beugen und strecken – dann wird es zum Drücken.", "Zu weit nach hinten öffnen, bis die Schulter zwickt.", "Schultern rollen nach vorn."], "dehnung": "Die offene Position ist die gedehnte. Im letzten Satz kannst du Teilwiederholungen in der offenen Hälfte anhängen.", "pause": "1–2 Min (Isolation)", "alt": [["Kurzhantel-Flys auf der Flachbank", "Hanteln über der Brust, Arme leicht gebeugt, seitlich bis Brusthöhe öffnen."], ["Butterfly-Maschine", "Siehe Setup oben."]], "bein": "Am Kabel keine Schrittstellung mit dem linken Bein hinten – parallel stehen oder Butterfly-Maschine nehmen.", "variants": ["Kabel-Flys / Butterfly", "Kurzhantel-Flys auf der Flachbank", "Butterfly-Maschine"], "assist": []}, "pullover": {"name": "Lat-Pullover am Kabel", "ziel": "Breiter Rückenmuskel (Lat) – isoliert, ohne dass der Bizeps mitarbeitet.", "setup": "Seil oder gerade Stange an der oberen Rolle. Ca. 1 m Abstand zum Turm, Füße parallel, Hüfte leicht gebeugt, Oberkörper ca. 30° nach vorn geneigt, Arme fast gestreckt über dem Kopf.", "ablauf": ["Mit fast gestreckten Armen in einem großen Bogen nach unten bis zu den Oberschenkeln ziehen.", "Unten den Lat kurz anspannen.", "Langsam zurück, bis die Arme über dem Kopf sind und der Lat gedehnt ist."], "atmung": "Beim Ziehen ausatmen, beim Zurückführen einatmen.", "tempo": "Ca. 1 Sek. ziehen, 2–3 Sek. zurück.", "fehler": ["Ellbogen beugen (dann wird es zum Trizepsdrücken).", "Mit dem Oberkörper schaukeln.", "Zu schweres Gewicht."], "dehnung": "Oben die Arme weit nach vorn oben lassen – der Lat wird dort lang gezogen.", "pause": "1–2 Min (Isolation)", "alt": [["Kurzhantel-Pullover", "Rückenlage quer oder längs auf der Flachbank, eine Hantel mit beiden Händen hinter den Kopf absenken und zurückführen."], ["Pullover-Maschine", "Falls vorhanden; Ausführung nach Gerät."]], "variants": ["Lat-Pullover am Kabel", "Kurzhantel-Pullover", "Pullover-Maschine"], "assist": []}, "schraegcurls": {"name": "Schrägbank-Curls mit Kurzhanteln", "ziel": "Bizeps, besonders der lange Kopf in gedehnter Position.", "setup": "Bank auf 45–60°, Rücken anlehnen. Arme hängen senkrecht nach unten (leicht hinter dem Körper), Handflächen nach vorn.", "ablauf": ["Hanteln hochbeugen, der Ellbogen bleibt in Position.", "Oben kurz anspannen.", "Langsam ganz nach unten ablassen, bis die Arme gestreckt sind."], "atmung": "Beim Beugen ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 2–3 Sek. runter.", "fehler": ["Schultern rollen nach vorn.", "Ellbogen wandern nach vorn.", "Unten nicht ganz strecken."], "dehnung": "Durch die Schrägbank hängt der Arm hinter dem Körper – der Bizeps wird unten stark gedehnt.", "pause": "1–2 Min (Isolation)", "alt": [["Bayesian Cable Curl", "Siehe Oberkörper A."], ["SZ-Curls", "Ellbogen seitlich am Körper, unten ganz strecken."]], "variants": ["Schrägbank-Curls mit Kurzhanteln", "Bayesian Cable Curl", "SZ-Curls"], "assist": []}, "dips": {"name": "Dips", "ziel": "Trizeps, untere Brust, vordere Schulter.", "setup": "Barren mit schulterbreitem Abstand. Für den Trizeps-Fokus Oberkörper eher aufrecht. Schaffst du noch keine 8 Wiederholungen: Dip-Maschine oder assistierte Dips.", "ablauf": ["Im Stütz mit gestreckten Armen starten, Schultern nach unten.", "Kontrolliert absenken, bis die Oberarme etwa parallel zum Boden sind – oder so tief, wie es die Schulter erlaubt.", "Hochdrücken, bis die Arme gestreckt sind."], "atmung": "Beim Absenken einatmen, beim Hochdrücken ausatmen.", "tempo": "2–3 Sek. runter, zügig hoch.", "fehler": ["Zu tief mit nach vorn rollenden Schultern.", "Schultern zu den Ohren hochziehen.", "Schwung aus den Beinen."], "dehnung": null, "pause": "2–3 Min (Grundübung)", "alt": [["Trizepsdrücken am Kabel", "Siehe Trainingstag 4, Übung 6b."], ["Dip-Maschine", "Sitzend, Griffe neben dem Körper nach unten drücken."]], "bein": "Beine locker unter dem Körper hängen lassen oder leicht nach vorn nehmen – nicht nach hinten strecken.", "variants": ["Dips", "Trizepsdrücken am Kabel", "Dip-Maschine"], "assist": []}, "pushdown": {"name": "Trizepsdrücken am Kabel", "ziel": "Trizeps (seitlicher und mittlerer Kopf).", "setup": "Seil oder gerade Stange an der oberen Rolle. Aufrecht, Füße parallel, Oberkörper leicht nach vorn geneigt, Ellbogen seitlich am Körper.", "ablauf": ["Unterarme nach unten strecken, beim Seil unten die Enden auseinanderziehen.", "Unten kurz anspannen.", "Zurück, bis die Hände etwa auf Brusthöhe sind."], "atmung": "Beim Drücken ausatmen, beim Zurückführen einatmen.", "tempo": "Ca. 1 Sek. runter, 2 Sek. zurück.", "fehler": ["Ellbogen wandern nach vorn oder hinten.", "Der Oberkörper drückt mit.", "Zu kurzer Weg nach oben."], "dehnung": null, "pause": "1–2 Min (Isolation)", "alt": [["Trizepsstrecken über Kopf am Kabel", "Siehe Oberkörper A – mehr Dehnung für den langen Kopf."], ["Einarmig mit Untergriff", "Einzelgriff, Handfläche nach oben, gleiche Ausführung."]], "variants": ["Trizepsdrücken am Kabel", "Trizepsstrecken über Kopf am Kabel", "Einarmig mit Untergriff"], "assist": []}, "beinpresse": {"name": "Beinpresse", "ziel": "Quadrizeps; Gesäß hilft mit.", "setup": "Rücken und Gesäß fest am Polster. Füße schulterbreit etwa mittig (tiefer = mehr Quadrizeps). Sicherung lösen.", "ablauf": ["Schlitten kontrolliert absenken, bis die Knie ca. 90° oder tiefer gebeugt sind – solange das Gesäß nicht abhebt.", "Der untere Rücken bleibt flach am Polster.", "Hochdrücken, ohne die Knie oben durchzudrücken."], "atmung": "Oben einatmen, beim Drücken ausatmen.", "tempo": "2–3 Sek. runter, nicht abfedern, kraftvoll hoch.", "fehler": ["Gesäß rollt unten ab (runder unterer Rücken).", "Knie fallen nach innen.", "Knie oben ganz durchgedrückt."], "dehnung": "Tiefe Position mitnehmen – dort ist der Quadrizeps gedehnt.", "pause": "2–3 Min (Grundübung)", "alt": [["Hackenschmidt", "Siehe Unterkörper A."], ["Goblet Squat", "Eine Kurzhantel vor der Brust, tief in die Kniebeuge, Oberkörper aufrecht."]], "bein": "UNPROBLEMATISCH.", "variants": ["Beinpresse", "Hackenschmidt", "Goblet Squat"], "assist": []}, "hipthrust": {"name": "Hip Thrust", "ziel": "Großer Gesäßmuskel; Beinbeuger helfen etwas mit.", "setup": "Schulterblätter an die Bankkante (Bank ca. 40 cm hoch). Langhantel mit Polster auf der Hüftfalte, Füße hüftbreit flach am Boden – so weit vom Po entfernt, dass die Schienbeine oben senkrecht stehen. Oder Hip-Thrust-Maschine.", "ablauf": ["Kinn leicht zur Brust, Becken leicht nach hinten kippen.", "Hüfte hochdrücken, bis Oberkörper und Oberschenkel eine Linie bilden – <b>nicht weiter<\/b>.", "Oben ca. 1 Sek. den Po fest anspannen.", "Kontrolliert ablassen, bis der Po kurz über dem Boden ist."], "atmung": "Unten einatmen, beim Hochdrücken ausatmen.", "tempo": "Ca. 1 Sek. hoch, 1 Sek. halten, 2 Sek. runter.", "fehler": ["Oben ins Hohlkreuz überstrecken.", "Füße zu nah oder zu weit weg.", "Bewegung aus dem unteren Rücken statt aus der Hüfte."], "dehnung": null, "pause": "2–3 Min (Grundübung)", "alt": [["Glute Bridge am Boden", "Rückenlage, gleiche Bewegung, mit Gewicht auf der Hüfte."], ["Hip-Thrust-Maschine", "Gurt bzw. Polster auf der Hüftfalte, Ausführung wie oben."]], "bein": "UNPROBLEMATISCH, weil die Hüfte höchstens bis neutral gestreckt wird. Oben nie überstrecken. KEINE Kickbacks (Bein nach hinten) als Ersatz.", "variants": ["Hip Thrust", "Glute Bridge am Boden", "Hip-Thrust-Maschine"], "assist": []}, "beinbeuger_l": {"name": "Beinbeuger liegend", "ziel": "Beinbeuger.", "setup": "Bauchlage, Knie knapp über der Polsterkante, Rolle über den Fersen. Hüfte fest auf das Polster drücken.", "ablauf": ["Fersen Richtung Po ziehen, bis die Knie maximal gebeugt sind.", "Kurz halten.", "Kontrolliert ablassen, bis die Beine fast gestreckt sind."], "atmung": "Beim Beugen ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 2–3 Sek. runter.", "fehler": ["Hüfte hebt vom Polster ab.", "Schwung.", "Nicht ganz ablassen."], "dehnung": "Unten fast ganz strecken.", "pause": "1–2 Min (Isolation)", "alt": [["Beinbeuger sitzend", "Siehe Unterkörper A – gleichwertiger Tausch."]], "bein": "Die Hüfte liegt neutral auf dem Polster, das Bein wird nicht hinter den Körper gestreckt. Trotzdem erst leicht testen.", "variants": ["Beinbeuger liegend", "Beinbeuger sitzend"], "assist": []}, "abwheel": {"name": "Ab-Wheel (Bauchroller)", "ziel": "Gerader Bauchmuskel, der Rumpf wird gegen Überstrecken stabilisiert.", "setup": "Auf eine Matte knien, Rad unter den Schultern, Arme gestreckt. Bauch fest, Becken leicht nach hinten gekippt (leicht runder Rücken).", "ablauf": ["Langsam nach vorn rollen – nur so weit, wie du ohne Hohlkreuz bleibst.", "Kurz halten.", "Mit dem Bauch zurückziehen, nicht mit der Hüfte."], "atmung": "Beim Ausrollen einatmen, beim Zurückziehen ausatmen.", "tempo": "2–3 Sek. raus, 1–2 Sek. zurück.", "fehler": ["Hohlkreuz in der vorderen Position.", "Zuerst die Hüfte nach hinten schieben statt den Bauch einzusetzen.", "Am Anfang zu weit rausrollen."], "dehnung": null, "pause": "1–2 Min (Isolation)", "alt": [["Crunch-Maschine", "Polster an Brust/Schultern, Oberkörper einrollen, langsam zurück."], ["Kabel-Crunch", "Siehe Unterkörper A."]], "bein": "Die Hüfte wird nur bis neutral gestreckt. Zieht es trotzdem, nimm die Crunch-Maschine.", "variants": ["Ab-Wheel (Bauchroller)", "Crunch-Maschine", "Kabel-Crunch"], "assist": []}, "szcurls": {"name": "SZ-Curls (oder Kurzhantel-Curls)", "ziel": "Bizeps.", "setup": "Aufrecht stehen, Füße parallel, SZ-Stange schulterbreit greifen, Ellbogen seitlich am Körper.", "ablauf": ["Stange hochbeugen, die Ellbogen bleiben am Körper.", "Oben kurz anspannen.", "Langsam ablassen, bis die Arme ganz gestreckt sind."], "atmung": "Beim Beugen ausatmen, beim Ablassen einatmen.", "tempo": "Ca. 1 Sek. hoch, 2–3 Sek. runter.", "fehler": ["Schwung aus dem Rücken.", "Ellbogen wandern nach vorn.", "Unten nicht ganz strecken."], "dehnung": null, "pause": "1–2 Min (Isolation)", "alt": [["Kabel-Curls", "Stange an der unteren Rolle – gleichmäßiger Widerstand."], ["Kurzhantel-Curls", "Abwechselnd oder gleichzeitig."]], "variants": ["SZ-Curls (oder Kurzhantel-Curls)", "Kabel-Curls", "Kurzhantel-Curls"], "assist": []}}};
+const VERSION = '1.0.0';
+const LS = 'trainingsapp.v1', TKEY = 'trainingsapp.timer';
+const DAYS = Object.fromEntries(DATA.days.map(d => [d.short, d]));
+const ORDER = DATA.days.map(d => d.short);
+const EX = DATA.ex;
+
+/* ---------- Speicher ---------- */
+function fresh() {
+  return { v: 1, settings: { start: '2026-11-02', kcalCheck: 2250, intro: 'auto', lastBackup: null },
+           sessions: [], draft: null, body: {} };
+}
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(LS)); if (s && s.v === 1) return s; } catch (e) {}
+  return fresh();
+}
+let S = load();
+let saveT = null;
+function save(now) {
+  clearTimeout(saveT);
+  const f = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) { toast('Speichern fehlgeschlagen!'); } };
+  if (now) f(); else saveT = setTimeout(f, 250);
+}
+window.addEventListener('pagehide', () => save(true));
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(true); });
+
+/* ---------- Helfer ---------- */
+const pad = n => String(n).padStart(2, '0');
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parseISO = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const today = () => iso(new Date());
+const fmt = s => { const d = parseISO(s); return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.'; };
+const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const fmtLong = s => { const d = parseISO(s); return WD[d.getDay()] + ', ' + fmt(s) + d.getFullYear(); };
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const num = v => (v === null || v === undefined || v === '') ? '–' : String(Math.round(v * 100) / 100).replace('.', ',');
+const pnum = s => { if (s === null || s === undefined) return null; const t = String(s).replace(',', '.').trim(); if (t === '') return null; const n = Number(t); return isFinite(n) ? n : null; };
+const daysBetween = (a, b) => Math.round((parseISO(b) - parseISO(a)) / 86400000);
+function weekOf(d) { return Math.floor(daysBetween(S.settings.start, d) / 7) + 1; }
+function weekStart(w) { const d = parseISO(S.settings.start); d.setDate(d.getDate() + 7 * (w - 1)); return iso(d); }
+function phase(w) {
+  if (w < 1) return { name: 'Vor dem Start', kcal: 2250 };
+  if (w === 8) return { name: 'Weihnachten – Erhaltung', kcal: 2600, maint: true };
+  if (w <= 15) return { name: 'Leichtes Defizit', kcal: 2250 };
+  if (w <= 17) return { name: 'Diät-Pause – Erhaltung', kcal: 2600, maint: true, note: w === 17 ? 'Ende der Woche: Check (Bauchumfang, Fotos, Wochenschnitt) – dann in den Einstellungen die kcal für März–Mai wählen.' : '' };
+  if (w <= 30) return { name: S.settings.kcalCheck >= 2600 ? 'Nach Check – Erhaltung' : 'Nach Check – Defizit', kcal: S.settings.kcalCheck, maint: S.settings.kcalCheck >= 2600 };
+  return { name: 'Juni – Ziel erreicht', kcal: null, maint: true };
+}
+let toastT;
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => t.style.display = 'none', 2600); }
+
+/* ---------- Trainingslogik ---------- */
+function plannedSets(it, date) {
+  const w = weekOf(date);
+  return (S.settings.intro === 'auto' && w <= 2) ? Math.min(2, it.n) : it.n;
+}
+function lastFor(key, variant) {
+  for (let i = S.sessions.length - 1; i >= 0; i--) {
+    const s = S.sessions[i];
+    for (const e of Object.values(s.entries)) {
+      if (e.key === key && e.variant === variant) {
+        const sets = e.sets.filter(x => x.done !== false && x.r != null);
+        if (sets.length) return { date: s.date, sets };
+      }
+    }
+  }
+  return null;
+}
+function lastVariant(key) {
+  for (let i = S.sessions.length - 1; i >= 0; i--)
+    for (const e of Object.values(S.sessions[i].entries)) if (e.key === key) return e.variant;
+  return 0;
+}
+function isAssist(key, variant) { return (EX[key].assist || []).includes(variant); }
+function progDue(it, last) {
+  if (!last || !last.sets.length) return false;
+  const w0 = last.sets[0].w;
+  return last.sets.every(s => s.r >= it.hi && s.w === w0);
+}
+function prefillSets(it, variant, n) {
+  const last = lastFor(it.key, variant);
+  return Array.from({ length: n }, (_, i) => {
+    let w = null;
+    if (last) { const s = last.sets[i] || last.sets[last.sets.length - 1]; w = s.w; }
+    return { w, r: null, done: false };
+  });
+}
+function startDay(short) {
+  if (S.draft && S.draft.day !== short) {
+    if (!confirm('Es läuft noch ein anderes Training. Verwerfen und neu starten?')) return;
+  }
+  if (!S.draft || S.draft.day !== short) {
+    const date = today(), entries = {};
+    for (const it of DAYS[short].items) {
+      const variant = lastVariant(it.key);
+      entries[it.id] = { key: it.key, variant, sets: prefillSets(it, variant, plannedSets(it, date)), note: '' };
+    }
+    S.draft = { day: short, date, started: Date.now(), entries };
+    save(true);
+  }
+  go('workout');
+}
+function nextDay() {
+  const last = S.sessions[S.sessions.length - 1];
+  if (!last) return ORDER[0];
+  return ORDER[(ORDER.indexOf(last.day) + 1) % ORDER.length];
+}
+function lastDateOf(short) {
+  for (let i = S.sessions.length - 1; i >= 0; i--) if (S.sessions[i].day === short) return S.sessions[i].date;
+  return null;
+}
+
+/* ---------- Ansichten ---------- */
+let view = S.draft ? 'workout' : 'home', histMode = 'sessions', histKey = null, trackDate = today(), summary = null;
+const app = document.getElementById('app');
+function go(v) { view = v; render(); window.scrollTo(0, 0); }
+function render() {
+  const tab = view === 'workout' ? 'home' : view;
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  ({ home: renderHome, workout: renderWorkout, track: renderTrack, hist: renderHist, info: renderInfo })[view]();
+  if (view === 'workout') wake(true); else wake(false);
+}
+
+function renderHome() {
+  const t = today(), w = weekOf(t), ph = phase(w);
+  let h = `<h1>Training</h1>`;
+  h += `<div class="card"><div class="spread"><div><div class="tag muted">${w < 1 ? 'Start ' + fmtLong(S.settings.start) : 'Woche ' + w + ' von 30'}</div>
+    <div style="font-size:18px;font-weight:700;margin-top:2px">${ph.name}</div></div>${ph.kcal ? `<span class="pill">~${ph.kcal.toLocaleString('de-DE')} kcal</span>` : ''}</div>
+    <p class="small muted">Tagesziel: ca. 140 g Protein · 8.000–10.000 Schritte · 7–9 h Schlaf</p>
+    ${ph.note ? `<p class="small"><b>${ph.note}</b></p>` : ''}
+    ${(S.settings.intro === 'auto' && w <= 2) ? `<p class="small"><b>Einstiegsphase:</b> Woche 1–2 je 2 Sätze pro Übung, ab Woche 3 volle Satzzahl.</p>` : ''}</div>`;
+  const lb = S.settings.lastBackup;
+  if (S.sessions.length && (!lb || daysBetween(lb, t) > 21))
+    h += `<div class="banner warn"><b>Backup fällig.</b> ${lb ? 'Letztes Backup: ' + fmt(lb) : 'Noch kein Backup gemacht.'} Deine Daten liegen nur auf diesem iPhone. <button class="mini" data-a="export" style="margin-top:8px">Jetzt sichern</button></div>`;
+  if (summary) {
+    h += `<div class="banner acc"><b>Stark – ${esc(summary.title)} gespeichert.</b> ${summary.sets} Sätze erledigt.${summary.up.length ? '<br><b>Nächstes Mal steigern:</b> ' + summary.up.map(esc).join(', ') : ''}</div>`;
+    summary = null;
+  }
+  if (S.draft) {
+    const d = DAYS[S.draft.day];
+    const done = Object.values(S.draft.entries).reduce((a, e) => a + e.sets.filter(s => s.done).length, 0);
+    h += `<button class="btn acc big" data-a="resume">Weiter: ${esc(d.title)}<span class="sub">läuft seit ${fmt(S.draft.date)} · ${done} Sätze erledigt</span></button>`;
+  } else {
+    const n = DAYS[nextDay()];
+    h += `<button class="btn acc big" data-a="start" data-day="${n.short}">Starten: ${esc(n.title)}<span class="sub">Nächster Tag im Rhythmus · empfohlen ${esc(n.tag)}</span></button>`;
+  }
+  h += `<h2>Alle Trainingstage</h2>`;
+  for (const d of DATA.days) {
+    const ld = lastDateOf(d.short);
+    h += `<button class="btn" data-a="start" data-day="${d.short}">${esc(d.title)}<span class="sub">${esc(d.tag)} · ${ld ? 'zuletzt ' + fmt(ld) : 'noch nicht trainiert'}</span></button>`;
+  }
+  app.innerHTML = h;
+}
+
+function variantsSelect(it, e) {
+  const vs = EX[it.key].variants;
+  return `<div class="vpick">${esc(vs[e.variant])}${vs.length > 1 ? '<span class="swap">⇄ Alternative</span>' : ''}
+    <select data-a="variant" data-id="${it.id}" aria-label="Übung oder Alternative wählen">${vs.map((v, i) =>
+    `<option value="${i}" ${i === e.variant ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></div>`;
+}
+function detailsHtml(x) {
+  return `<dl><dt>Zielmuskel</dt><dd>${x.ziel}</dd><dt>Einstellung</dt><dd>${x.setup}</dd>
+  <dt>Ausführung</dt><dd><ol>${x.ablauf.map(a => `<li>${a}</li>`).join('')}</ol></dd>
+  <dt>Atmung</dt><dd>${x.atmung}</dd><dt>Tempo</dt><dd>${x.tempo}</dd>
+  <dt>Häufige Fehler</dt><dd><ul>${x.fehler.map(a => `<li>${a}</li>`).join('')}</ul></dd>
+  ${x.dehnung ? `<dt>Gedehnte Position</dt><dd>${x.dehnung}</dd>` : ''}
+  <dt>Satzpause</dt><dd>${x.pause}</dd>
+  <dt>Alternativen</dt><dd><ul>${x.alt.map(([n, t]) => `<li><b>${n}:</b> ${t}</li>`).join('')}</ul></dd></dl>`;
+}
+function setRow(it, e, s, i, last) {
+  const lr = last ? (last.sets[i] || last.sets[last.sets.length - 1]).r : null;
+  return `<div class="setrow ${s.done ? 'done' : ''}">
+    <span class="sn">${i + 1}</span>
+    <input type="text" inputmode="decimal" enterkeyhint="next" data-a="w" data-id="${it.id}" data-i="${i}" value="${s.w != null ? num(s.w) : ''}" placeholder="kg" aria-label="Gewicht Satz ${i + 1}">
+    <span class="x">×</span>
+    <input type="text" inputmode="numeric" enterkeyhint="done" data-a="r" data-id="${it.id}" data-i="${i}" value="${s.r ?? ''}" placeholder="${lr ?? it.lo + '–' + it.hi}" aria-label="Wiederholungen Satz ${i + 1}">
+    <button class="chk" data-a="done" data-id="${it.id}" data-i="${i}" aria-label="Satz ${i + 1} erledigt">${s.done ? '✓' : ''}</button></div>`;
+}
+function exCard(it) {
+  const e = S.draft.entries[it.id], x = EX[it.key];
+  const last = lastFor(it.key, e.variant), due = progDue(it, last), assist = isAssist(it.key, e.variant);
+  const allDone = e.sets.length && e.sets.every(s => s.done);
+  let h = `<section class="card ex ${allDone ? 'done' : ''}" id="ex-${it.id}">
+   <div class="exhead"><span class="nr">${it.id}</span><div style="flex:1;min-width:0">${variantsSelect(it, e)}
+   <div class="target">${e.sets.length} × ${it.lo}–${it.hi} · RIR ${it.rir} · Pause ${it.pauseTxt}</div></div></div>`;
+  if (x.bein) h += `<div class="bein"><b>Linkes Bein:</b> ${x.bein}</div>`;
+  if (it.note) h += `<div class="today"><b>Heute:</b> ${it.note}</div>`;
+  if (assist) h += `<div class="today">Gewicht = <b>Gegengewicht</b> der Maschine. Weniger Gegengewicht ist schwerer.</div>`;
+  h += `<div class="last">${last ? `Letztes Mal (${fmt(last.date)}): <b class="k">${last.sets.map(s => num(s.w) + '×' + s.r).join(' · ')}</b>`
+       : 'Noch keine Daten: Wähle ein Gewicht, mit dem du im unteren Bereich der Vorgabe landest.'}</div>`;
+  if (due) {
+    const sign = assist ? -1 : 1;
+    h += `<div class="prog"><b>⬆ Oberes Ende in allen Sätzen erreicht.</b> Heute ${assist ? 'weniger Gegengewicht' : 'mehr Gewicht'} (kleinster Schritt).
+      <div class="row"><button class="mini acc" data-a="inc" data-id="${it.id}" data-v="${2.5 * sign}">${sign > 0 ? '+' : '−'}2,5 kg</button>
+      <button class="mini" data-a="inc" data-id="${it.id}" data-v="${2 * sign}">${sign > 0 ? '+' : '−'}2 kg</button>
+      <button class="mini" data-a="inc" data-id="${it.id}" data-v="${1 * sign}">${sign > 0 ? '+' : '−'}1 kg</button></div></div>`;
+  }
+  h += `<div class="sets">${e.sets.map((s, i) => setRow(it, e, s, i, last)).join('')}</div>
+   <div class="row"><button class="mini" data-a="addset" data-id="${it.id}">+ Satz</button>${e.sets.length > 1 ? `<button class="mini" data-a="delset" data-id="${it.id}">− Satz</button>` : ''}</div>
+   <input class="note" data-a="note" data-id="${it.id}" value="${esc(e.note)}" placeholder="Notiz (z. B. Sitz 4, Lehne 2)">
+   <details class="det"><summary>Ausführung &amp; Details</summary>${detailsHtml(x)}</details></section>`;
+  return h;
+}
+function renderWorkout() {
+  if (!S.draft) { view = 'home'; return renderHome(); }
+  const d = DAYS[S.draft.day], w = Math.max(1, weekOf(S.draft.date));
+  let h = `<div class="topbar"><button class="link" data-a="home">‹ Übersicht</button><span class="muted small">${fmtLong(S.draft.date)} · Woche ${w}</span></div>
+    <h1>${esc(d.title)}</h1>
+    <details class="card"><summary>Aufwärmen <span class="muted small">(5–8 Min + Aufwärmsätze)</span></summary>
+    <ol class="small">${d.warmup.map(x => `<li>${x}</li>`).join('')}</ol><p class="small"><b>Aufwärmsätze:</b> ${d.warmsets}</p>
+    <div class="bein">Im Aufwärmen nichts, was das linke Bein hinter den Körper streckt – keine Ausfallschritte, keine Beinschwünge nach hinten, keine Dehnung der Hüftvorderseite.</div></details>`;
+  for (const it of d.items) {
+    if (it.superset && it.pos === 'a')
+      h += `<div class="ssbanner"><b>Superset ${it.nr}:</b> ${esc(it.ssName)}. Satz a, direkt danach Satz b, dann 60–90 Sek Pause.</div>`;
+    h += exCard(it);
+  }
+  h += `<button class="btn acc big" data-a="finish">Training abschließen</button>
+        <button class="btn danger" data-a="discard">Training verwerfen</button>`;
+  app.innerHTML = h;
+}
+function rerenderCard(id) {
+  const it = DAYS[S.draft.day].items.find(i => i.id === id);
+  const el = document.getElementById('ex-' + id);
+  const open = el.querySelector('details.det')?.open;
+  el.outerHTML = exCard(it);
+  if (open) document.querySelector('#ex-' + id + ' details.det').open = true;
+}
+
+/* ---------- Körper ---------- */
+function weekStats() {
+  const m = {};
+  for (const [d, v] of Object.entries(S.body)) {
+    const w = Math.max(0, weekOf(d));
+    const o = m[w] ??= { w, ws: [], steps: [], waist: null, waistDate: '', photo: false };
+    if (v.w != null) o.ws.push(v.w);
+    if (v.steps != null) o.steps.push(v.steps);
+    if (v.waist != null && d >= o.waistDate) { o.waist = v.waist; o.waistDate = d; }
+    if (v.photo) o.photo = true;
+  }
+  const arr = Object.values(m).sort((a, b) => a.w - b.w);
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  for (const o of arr) { o.avg = avg(o.ws); o.stepsAvg = avg(o.steps); }
+  for (const o of arr) { const p = m[o.w - 1]; o.delta = (p && p.avg != null && o.avg != null) ? o.avg - p.avg : null; o.waistPrev = p ? p.waist : null; }
+  return { arr, m };
+}
+function hints(st) {
+  const cur = weekOf(today()), out = [];
+  const done = st.arr.filter(o => o.w >= 1 && o.w < cur && o.avg != null);
+  if (!done.length) return ['Trag täglich morgens dein Gewicht ein und einmal pro Woche den Bauchumfang. Die Regeln greifen ab der ersten abgeschlossenen Woche.'];
+  const last = done[done.length - 1];
+  if (last.delta != null && last.delta < -0.6)
+    out.push(`<b>Woche ${last.w}: −${num(-last.delta)} kg.</b> Mehr als 0,6 kg pro Woche → <b>+150 kcal</b>.`);
+  const l3 = done.slice(-3);
+  if (l3.length === 3 && l3.every(o => o.w === l3[0].w + l3.indexOf(o)) && l3.every(o => !phase(o.w).maint && o.delta != null && o.delta > -0.2)) {
+    const first = st.m[l3[0].w - 1], waistNow = l3[2].waist ?? l3[1].waist, waistThen = first ? first.waist : null;
+    if (waistNow != null && waistThen != null && waistNow < waistThen)
+      out.push(`<b>Bauchumfang sinkt (${num(waistThen)} → ${num(waistNow)} cm), Waage steht</b> → Rekomposition läuft, <b>nichts ändern</b>.`);
+    else
+      out.push(`<b>3 Wochen unter 0,2 kg Abnahme.</b> → <b>150 kcal weniger</b> oder <b>+2.000 Schritte</b> pro Tag.`);
+  } else if (last.delta != null && last.delta > -0.2 && last.waist != null && last.waistPrev != null && last.waist < last.waistPrev) {
+    out.push(`<b>Bauchumfang sinkt, Waage steht</b> → Rekomposition läuft, nichts ändern.`);
+  }
+  if (cur <= 4 && last.delta != null && last.delta > 0)
+    out.push('Gewicht leicht gestiegen? In den ersten Wochen speichert Kreatin 1–2 kg Wasser – das ist kein Fett. Schau auf den Bauchumfang.');
+  if (!out.length) out.push('Alles im Plan – weiter so. Ziel: 0,3–0,5 kg pro Woche (Wochenschnitt).');
+  return out;
+}
+function spark(vals, label, unit) {
+  const pts = vals.filter(v => v.y != null);
+  if (pts.length < 2) return '';
+  const ys = pts.map(p => p.y), mn = Math.min(...ys), mx = Math.max(...ys), rg = (mx - mn) || 1;
+  const W = 300, H = 60, xs = pts.map((p, i) => 6 + i * (W - 12) / (pts.length - 1));
+  const line = pts.map((p, i) => `${xs[i].toFixed(1)},${(H - 6 - (p.y - mn) / rg * (H - 12)).toFixed(1)}`).join(' ');
+  return `<div class="spread small"><b>${label}</b><span class="muted">${num(pts[0].y)} → <b style="color:var(--text)">${num(pts[pts.length - 1].y)} ${unit}</b></span></div>
+   <svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polyline points="${line}" fill="none" stroke="var(--acc)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+function renderTrack() {
+  const v = S.body[trackDate] || {}, w = weekOf(trackDate);
+  const st = weekStats();
+  let h = `<h1>Körper</h1>
+  <div class="card form"><div class="spread"><b>Eintrag</b><span class="muted small">${w >= 1 ? 'Woche ' + w : 'vor dem Start'}</span></div>
+   <label>Datum</label><input type="date" id="tDate" value="${trackDate}">
+   <label>Gewicht morgens nüchtern (kg)</label><input type="text" inputmode="decimal" id="tW" value="${v.w != null ? num(v.w) : ''}" placeholder="z. B. 71,2">
+   <label>Schritte</label><input type="text" inputmode="numeric" id="tS" value="${v.steps ?? ''}" placeholder="z. B. 9500">
+   <label>Bauchumfang auf Nabelhöhe (cm) – 1× pro Woche</label><input type="text" inputmode="decimal" id="tB" value="${v.waist != null ? num(v.waist) : ''}" placeholder="z. B. 84,5">
+   <label class="check"><input type="checkbox" id="tP" ${v.photo ? 'checked' : ''}> Fotos gemacht (alle 2 Wochen)</label>
+   <button class="btn acc" data-a="tsave">Speichern</button></div>`;
+  h += `<div class="card"><b>Auswertung</b>${hints(st).map(x => `<p class="small">${x}</p>`).join('')}</div>`;
+  const ws = st.arr.filter(o => o.w >= 0);
+  const sp = spark(ws.map(o => ({ y: o.avg })), 'Wochenschnitt Gewicht', 'kg') + spark(ws.map(o => ({ y: o.waist })), 'Bauchumfang', 'cm');
+  if (sp) h += `<div class="card">${sp}</div>`;
+  if (ws.length) {
+    h += `<div class="card"><b>Wochen</b><table><tr><th>Wo.</th><th class="num">Ø kg</th><th class="num">Δ</th><th class="num">Bauch</th><th class="num">Ø Schritte</th><th>📷</th></tr>`;
+    for (const o of [...ws].reverse()) {
+      h += `<tr><td><b>${o.w || 'Start'}</b><br><span class="muted">${o.w ? fmt(weekStart(o.w)) : ''}</span></td>
+      <td class="num">${num(o.avg != null ? Math.round(o.avg * 10) / 10 : null)}</td>
+      <td class="num">${o.delta != null ? (o.delta > 0 ? '+' : '') + num(Math.round(o.delta * 10) / 10) : '–'}</td>
+      <td class="num">${num(o.waist)}</td><td class="num">${o.stepsAvg != null ? Math.round(o.stepsAvg).toLocaleString('de-DE') : '–'}</td>
+      <td>${o.photo ? '✓' : ''}</td></tr>`;
+    }
+    h += `</table><p class="small muted">Δ = Veränderung des Wochenschnitts zur Vorwoche.</p></div>`;
+  }
+  app.innerHTML = h;
+  document.getElementById('tDate').addEventListener('change', ev => { trackDate = ev.target.value || today(); renderTrack(); });
+}
+
+/* ---------- Verlauf ---------- */
+function renderHist() {
+  let h = `<h1>Verlauf</h1><div class="seg"><button data-a="hm" data-m="sessions" class="${histMode === 'sessions' ? 'on' : ''}">Trainings</button><button data-a="hm" data-m="ex" class="${histMode === 'ex' ? 'on' : ''}">Übungen</button></div>`;
+  if (histMode === 'sessions') {
+    if (!S.sessions.length) h += `<p class="muted">Noch keine abgeschlossenen Trainings.</p>`;
+    for (let i = S.sessions.length - 1; i >= 0; i--) {
+      const s = S.sessions[i], d = DAYS[s.day];
+      const n = Object.values(s.entries).reduce((a, e) => a + e.sets.length, 0);
+      h += `<details class="card"><summary>${fmtLong(s.date)} · ${esc(d.title)} <span class="muted small">(${n} Sätze)</span></summary><table>`;
+      for (const it of d.items) {
+        const e = s.entries[it.id]; if (!e || !e.sets.length) continue;
+        h += `<tr><td>${it.id} ${esc(EX[e.key].variants[e.variant])}${e.note ? `<br><span class="muted">${esc(e.note)}</span>` : ''}</td><td class="num k">${e.sets.map(x => num(x.w) + '×' + x.r).join('<br>')}</td></tr>`;
+      }
+      h += `</table><button class="btn danger" data-a="delsess" data-i="${i}">Dieses Training löschen</button></details>`;
+    }
+  } else {
+    const keys = [...new Set(DATA.days.flatMap(d => d.items.map(i => i.key)))];
+    histKey ??= keys[0];
+    h += `<div class="form"><select id="hKey">${keys.map(k => `<option value="${k}" ${k === histKey ? 'selected' : ''}>${esc(EX[k].name)}</option>`).join('')}</select></div>`;
+    const rows = [];
+    for (const s of S.sessions) for (const e of Object.values(s.entries)) if (e.key === histKey && e.sets.length) rows.push({ date: s.date, e });
+    if (!rows.length) h += `<p class="muted">Noch keine Einträge für diese Übung.</p>`;
+    else {
+      h += `<div class="card"><table><tr><th>Datum</th><th>Variante</th><th class="num">Sätze</th></tr>`;
+      for (const r of rows.reverse()) h += `<tr><td>${fmt(r.date)}</td><td>${esc(EX[histKey].variants[r.e.variant])}</td><td class="num k">${r.e.sets.map(x => num(x.w) + '×' + x.r).join(' · ')}</td></tr>`;
+      h += `</table></div>`;
+    }
+  }
+  app.innerHTML = h;
+  const sel = document.getElementById('hKey');
+  if (sel) sel.addEventListener('change', ev => { histKey = ev.target.value; renderHist(); });
+}
+
+/* ---------- Infos + Einstellungen ---------- */
+function renderInfo() {
+  const s = S.settings;
+  let h = `<h1>Infos</h1><div class="info">` + document.getElementById('infoTpl').innerHTML + `</div>
+  <h2>Einstellungen</h2><div class="card form">
+   <label>Startdatum des Plans (Montag der Woche 1)</label><input type="date" id="sStart" value="${s.start}">
+   <label>Kalorien März–Mai (nach dem Check in Woche 17)</label>
+   <select id="sKcal"><option value="2250" ${s.kcalCheck == 2250 ? 'selected' : ''}>~2.250 kcal – weiter im Defizit</option><option value="2600" ${s.kcalCheck == 2600 ? 'selected' : ''}>~2.600 kcal – Erhaltung</option></select>
+   <label>Einstiegsphase (Woche 1–2 mit 2 Sätzen)</label>
+   <select id="sIntro"><option value="auto" ${s.intro === 'auto' ? 'selected' : ''}>Automatisch</option><option value="off" ${s.intro === 'off' ? 'selected' : ''}>Aus – immer volle Satzzahl</option></select></div>
+  <h2>Backup</h2><div class="card"><p class="small">Deine Daten liegen nur auf diesem iPhone. Sichere sie regelmäßig, z. B. in iCloud Drive („In Dateien sichern“).</p>
+   <p class="small muted">Letztes Backup: ${s.lastBackup ? fmtLong(s.lastBackup) : 'noch keins'} · ${S.sessions.length} Trainings · ${Object.keys(S.body).length} Körper-Einträge</p>
+   <button class="btn acc" data-a="export">Backup exportieren</button><button class="btn" data-a="import">Backup importieren</button></div>
+  <button class="btn danger" data-a="wipe">Alle Daten löschen</button>
+  <p class="small muted" style="text-align:center">Version ${VERSION} · läuft offline, ohne Konto, ohne KI</p>`;
+  app.innerHTML = h;
+  document.getElementById('sStart').addEventListener('change', ev => { if (ev.target.value) { S.settings.start = ev.target.value; save(true); toast('Startdatum gespeichert'); } });
+  document.getElementById('sKcal').addEventListener('change', ev => { S.settings.kcalCheck = Number(ev.target.value); save(true); toast('Gespeichert'); });
+  document.getElementById('sIntro').addEventListener('change', ev => { S.settings.intro = ev.target.value; save(true); toast('Gespeichert'); });
+}
+
+/* ---------- Backup ---------- */
+async function exportBackup() {
+  const name = `training-backup-${today()}.json`;
+  const blob = new Blob([JSON.stringify(S)], { type: 'application/json' });
+  const mark = () => { S.settings.lastBackup = today(); save(true); render(); toast('Backup erstellt'); };
+  try {
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Training-Backup' });
+      return mark();
+    }
+  } catch (err) { if (err && err.name === 'AbortError') return; }
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  mark();
+}
+document.getElementById('importFile').addEventListener('change', async ev => {
+  const f = ev.target.files[0]; ev.target.value = '';
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || d.v !== 1 || !Array.isArray(d.sessions) || typeof d.body !== 'object') throw new Error('Format');
+    if (!confirm(`Backup mit ${d.sessions.length} Trainings laden? Die aktuellen Daten auf diesem Gerät werden ersetzt.`)) return;
+    S = Object.assign(fresh(), d); S.settings = Object.assign(fresh().settings, d.settings || {});
+    save(true); view = 'home'; render(); toast('Backup geladen');
+  } catch (e) { toast('Datei ist kein gültiges Backup.'); }
+});
+
+/* ---------- Pausen-Timer ---------- */
+let tEnd = Number(localStorage.getItem(TKEY)) || 0, tTotal = 0, tInt = null, actx = null;
+const tEl = document.getElementById('timer');
+function unlockAudio() {
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {}
+}
+function beep() {
+  try {
+    if (!actx) return;
+    [0, 0.25, 0.5].forEach(o => {
+      const os = actx.createOscillator(), g = actx.createGain();
+      os.frequency.value = 880; g.gain.setValueAtTime(0.0001, actx.currentTime + o);
+      g.gain.exponentialRampToValueAtTime(0.3, actx.currentTime + o + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + o + 0.18);
+      os.connect(g).connect(actx.destination); os.start(actx.currentTime + o); os.stop(actx.currentTime + o + 0.2);
+    });
+  } catch (e) {}
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+}
+function startTimer(sec) {
+  tEnd = Date.now() + sec * 1000; tTotal = sec; localStorage.setItem(TKEY, tEnd);
+  tEl.style.display = 'block'; if (!tInt) tInt = setInterval(tick, 250); tick();
+}
+function stopTimer() { tEnd = 0; localStorage.removeItem(TKEY); clearInterval(tInt); tInt = null; tEl.style.display = 'none'; }
+function tick() {
+  const left = Math.ceil((tEnd - Date.now()) / 1000);
+  if (left <= 0) {
+    document.getElementById('tlabel').textContent = 'Pause vorbei'; document.getElementById('tval').textContent = 'Nächster Satz!';
+    document.getElementById('tbar').style.width = '100%';
+    clearInterval(tInt); tInt = null; localStorage.removeItem(TKEY); beep();
+    setTimeout(() => { if (!tInt) tEl.style.display = 'none'; }, 5000);
+    return;
+  }
+  document.getElementById('tlabel').textContent = 'Satzpause';
+  document.getElementById('tval').textContent = Math.floor(left / 60) + ':' + pad(left % 60);
+  document.getElementById('tbar').style.width = (tTotal ? 100 * (1 - left / tTotal) : 0) + '%';
+}
+if (tEnd > Date.now()) { tTotal = Math.ceil((tEnd - Date.now()) / 1000); tEl.style.display = 'block'; tInt = setInterval(tick, 250); tick(); }
+
+/* ---------- Bildschirm an lassen ---------- */
+let wl = null;
+async function wake(on) {
+  try {
+    if (on && !wl && 'wakeLock' in navigator) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => wl = null); }
+    if (!on && wl) { await wl.release(); wl = null; }
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && view === 'workout') wake(true); });
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener('input', ev => {
+  const t = ev.target, a = t.dataset.a;
+  if (!S.draft || !a) return;
+  const e = S.draft.entries[t.dataset.id]; if (!e) return;
+  if (a === 'w') e.sets[+t.dataset.i].w = pnum(t.value);
+  else if (a === 'r') { const n = pnum(t.value); e.sets[+t.dataset.i].r = n == null ? null : Math.round(n); }
+  else if (a === 'note') e.note = t.value;
+  save();
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset.a === 'variant') {
+    const it = DAYS[S.draft.day].items.find(i => i.id === t.dataset.id), e = S.draft.entries[it.id];
+    e.variant = Number(t.value);
+    const pre = prefillSets(it, e.variant, e.sets.length);
+    e.sets = e.sets.map((s, i) => s.done ? s : { ...s, w: pre[i].w });
+    save(true); rerenderCard(it.id);
+  }
+});
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-a],[data-tab]'); if (!b) return;
+  if (b.dataset.tab) { const tb = b.dataset.tab; go(tb === 'home' && S.draft ? 'workout' : tb); return; }
+  const a = b.dataset.a, id = b.dataset.id;
+  if (a === 'home') return go('home');
+  if (a === 'start') return startDay(b.dataset.day);
+  if (a === 'resume') return go('workout');
+  if (a === 'done') {
+    unlockAudio();
+    const it = DAYS[S.draft.day].items.find(i => i.id === id), e = S.draft.entries[id], s = e.sets[+b.dataset.i];
+    if (s.done) { s.done = false; save(true); rerenderCard(id); return; }
+    if (s.r == null) {
+      const inp = document.querySelector(`#ex-${id} input[data-a="r"][data-i="${b.dataset.i}"]`);
+      if (inp && inp.placeholder && /^\d+$/.test(inp.placeholder)) { s.r = Number(inp.placeholder); }
+      else { toast('Bitte Wiederholungen eintragen'); inp && inp.focus(); return; }
+    }
+    if (s.w == null) s.w = 0;
+    s.done = true; save(true); rerenderCard(id);
+    if (it.pauseSec > 0) startTimer(it.pauseSec); else toast('Direkt weiter mit ' + it.nr + 'b');
+    return;
+  }
+  if (a === 'inc') {
+    const e = S.draft.entries[id], v = Number(b.dataset.v);
+    e.sets.forEach(s => { if (!s.done) s.w = Math.max(0, Math.round(((s.w || 0) + v) * 100) / 100); });
+    save(true); rerenderCard(id); toast('Gewicht angepasst'); return;
+  }
+  if (a === 'addset') { const e = S.draft.entries[id]; const l = e.sets[e.sets.length - 1]; e.sets.push({ w: l ? l.w : null, r: null, done: false }); save(true); rerenderCard(id); return; }
+  if (a === 'delset') { const e = S.draft.entries[id]; if (e.sets.length > 1) e.sets.pop(); save(true); rerenderCard(id); return; }
+  if (a === 'finish') {
+    const d = S.draft, day = DAYS[d.day];
+    const entries = {}; let n = 0; const up = [];
+    for (const it of day.items) {
+      const e = d.entries[it.id], sets = e.sets.filter(s => s.done).map(s => ({ w: s.w, r: s.r }));
+      if (!sets.length) continue;
+      entries[it.id] = { key: e.key, variant: e.variant, sets, note: e.note }; n += sets.length;
+      if (sets.every(s => s.r >= it.hi && s.w === sets[0].w)) up.push(EX[e.key].variants[e.variant]);
+    }
+    if (!n) { if (confirm('Noch kein Satz erledigt. Training verwerfen?')) { S.draft = null; save(true); go('home'); } return; }
+    const open = day.items.reduce((a, it) => a + d.entries[it.id].sets.filter(s => !s.done).length, 0);
+    if (open && !confirm(`${open} Sätze sind noch offen. Trotzdem abschließen?`)) return;
+    S.sessions.push({ day: d.day, date: d.date, started: d.started, finished: Date.now(), entries });
+    S.sessions.sort((x, y) => (x.date + x.started).localeCompare(y.date + y.started));
+    S.draft = null; save(true); stopTimer(); summary = { title: day.title, sets: n, up }; go('home'); return;
+  }
+  if (a === 'discard') { if (confirm('Training wirklich verwerfen? Die Eingaben gehen verloren.')) { S.draft = null; save(true); stopTimer(); go('home'); } return; }
+  if (a === 't30') { tEnd = Math.max(tEnd, Date.now()) + 30000; tTotal += 30; localStorage.setItem(TKEY, tEnd); if (!tInt) { tEl.style.display = 'block'; tInt = setInterval(tick, 250); } tick(); return; }
+  if (a === 'tstop') return stopTimer();
+  if (a === 'tsave') {
+    const o = { w: pnum(document.getElementById('tW').value), steps: pnum(document.getElementById('tS').value),
+                waist: pnum(document.getElementById('tB').value), photo: document.getElementById('tP').checked };
+    if (o.steps != null) o.steps = Math.round(o.steps);
+    if (o.w == null && o.steps == null && o.waist == null && !o.photo) delete S.body[trackDate]; else S.body[trackDate] = o;
+    save(true); toast('Gespeichert'); renderTrack(); return;
+  }
+  if (a === 'hm') { histMode = b.dataset.m; return renderHist(); }
+  if (a === 'delsess') { if (confirm('Dieses Training löschen?')) { S.sessions.splice(+b.dataset.i, 1); save(true); renderHist(); } return; }
+  if (a === 'export') return exportBackup();
+  if (a === 'import') return document.getElementById('importFile').click();
+  if (a === 'wipe') { if (confirm('Wirklich ALLE Daten löschen? Das lässt sich nicht rückgängig machen.') && confirm('Ganz sicher? Vorher besser ein Backup exportieren.')) { S = fresh(); save(true); stopTimer(); go('home'); } return; }
+});
+
+/* ---------- Start ---------- */
+render();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
